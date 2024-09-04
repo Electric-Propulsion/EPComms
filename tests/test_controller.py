@@ -1,4 +1,4 @@
-from epcomms.controller.base import Controller
+from epcomms.base import Controller
 
 
 def test_controller_init():
