@@ -1,4 +1,4 @@
-from epcomms.base import Controller, Instrument
+from epcomms.equipment.base import Controller, Instrument
 
 
 class FlowController(Controller, Instrument):

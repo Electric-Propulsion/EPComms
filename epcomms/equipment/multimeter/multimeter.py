@@ -1,4 +1,5 @@
-from epcomms.base import Instrument
+from epcomms.equipment.base import Instrument
 
-class Multimeter(Instrument): 
+
+class Multimeter(Instrument):
     pass
