@@ -1,11 +1,10 @@
-from abc import abstractmethod
-from epcomms.equipment.base import Controller, Instrument
+from abc import ABC, abstractmethod
+from epcomms.equipment.base import Instrument
 
 
-class PowerSupply(Controller, Instrument):
+class PowerSupply(Instrument):
     def __init__(self, transmission) -> None:
-        self.transmission = transmission
-        super().__init__()
+        super().__init__(transmission)
 
     @abstractmethod
     def set_voltage(self, voltage: float, channel: int = 0) -> None:

@@ -1,4 +1,5 @@
 from abc import ABC
+from epcomms.connection.transmission import Transmission
 
 class Instrument(ABC):
     """
@@ -7,3 +8,8 @@ class Instrument(ABC):
     Instruments are software representations of agents in the real world that
     can sense the physical environment.
     """
+
+    transmission: Transmission
+
+    def __init__(self, transmission: Transmission):
+        self.transmission = transmission

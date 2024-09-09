@@ -1,5 +1,5 @@
-from epcomms.equipment.base import Controller, Instrument
+from epcomms.equipment.base import Instrument
 
 
-class VacuumController(Controller, Instrument):
+class VacuumController(Instrument):
     pass

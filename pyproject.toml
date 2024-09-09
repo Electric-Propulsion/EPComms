@@ -2,7 +2,7 @@
 name = "epcomms"
 version = "0.1.0"
 description = ""
-authors = ["Eric Souder <eric@souder.ca"]
+authors = ["Eric Souder <eric@souder.ca>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

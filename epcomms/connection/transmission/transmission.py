@@ -1,7 +1,20 @@
 from abc import ABC, abstractmethod
+from epcomms.connection.packet import Packet
 
 
 class Transmission(ABC):
+
+    packet_class: type
+
+    def __init__(self, packet_class: type) -> None:
+        #TODO: Is there a way to type hint this?
+        #TODO: We should check if the packet is concrete
+        #TODO: Is there a way to check this without instantiating the object?
+        if not issubclass(packet_class, Packet):
+            raise TypeError("packet_class must be of type Packet")
+
+        self.packet_class = packet_class
+
 
     @abstractmethod
     def command(self, data: str) -> None:

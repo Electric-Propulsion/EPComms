@@ -1,5 +1,5 @@
-from epcomms.equipment.base import Controller, Instrument
+from epcomms.equipment.base import Instrument
 
 
-class FlowController(Controller, Instrument):
+class FlowController(Instrument):
     pass
