@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 pyvisa = "^1.14.1"
+pycomm3 = "^1.2.14"
 
 
 [tool.poetry.group.dev.dependencies]

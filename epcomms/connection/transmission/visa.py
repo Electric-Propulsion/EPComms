@@ -1,6 +1,6 @@
 from . import Transmission
 import pyvisa
-from epcomms.connection.packet import ASCII
+from epcomms.connection.packet import Packet, ASCII
 
 
 class Visa(Transmission):
@@ -15,10 +15,10 @@ class Visa(Transmission):
         self.device = pyvisa.ResourceManager().open_resource(resource_name)
         super().__init__(ASCII)
 
-    def command(self, data: str) -> None:
-        packet = self.packet_class(data)
-        self.device.write(packet.serialize_str())
+    def command(self, data: ASCII) -> None:
+        assert isinstance(data, ASCII)
+        self.device.write(data.serialize_str())
 
-    def read(self) -> str:
+    def read(self) -> Packet:
         packet = self.packet_class(self.device.read())
-        return packet.data
+        return packet

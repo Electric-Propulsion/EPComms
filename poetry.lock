@@ -116,6 +116,20 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "pycomm3"
+version = "1.2.14"
+description = "A Python Ethernet/IP library for communicating with Allen-Bradley PLCs."
+optional = false
+python-versions = ">=3.6.1"
+files = [
+    {file = "pycomm3-1.2.14-py3-none-any.whl", hash = "sha256:49cd78b13bddf2ff234f77dc1d9048f5e139ac6fa2b77c7320aa2b90eb5c4ace"},
+    {file = "pycomm3-1.2.14.tar.gz", hash = "sha256:ffabe89cda3df733fc046e261c15d263134f2f35d7dbb6aedf788203a10615b7"},
+]
+
+[package.extras]
+tests = ["pytest"]
+
+[[package]]
 name = "pylint"
 version = "3.2.7"
 description = "python code static checker"
@@ -198,4 +212,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "7103ecda0acaed91349c4cbb0ba89f86c63c5f4ac914b6b520009a8adabba3f1"
+content-hash = "042289ca451059587c92447ddce8ac8c07b7b20de3a89ceb6029b6493545de3b"

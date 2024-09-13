@@ -1,6 +1,7 @@
 from abc import ABC
 from epcomms.connection.transmission import Transmission
 
+
 class Instrument(ABC):
     """
     Abstract Base Class for all Instruments.
