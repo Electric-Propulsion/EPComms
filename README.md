@@ -1,1 +1,1 @@
-![pylint](https://github.com/Electric-Propulsion/EPComms/actions/runs/10845719233/workflow/badge.svg)
+![pylint](https://github.com/Electric-Propulsion/EPComms/edit/master/.github/workflows/pylint.yml/badge.svg)
