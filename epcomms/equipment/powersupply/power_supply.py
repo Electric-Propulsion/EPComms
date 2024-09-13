@@ -1,31 +1,40 @@
-from abc import ABC, abstractmethod
+"""
+This module defines the abstract base class `PowerSupply` for all power supplies.
+"""
+
+from abc import abstractmethod
 from epcomms.equipment.base import Instrument
 
 
 class PowerSupply(Instrument):
-    def __init__(self, transmission) -> None:
-        super().__init__(transmission)
+    """Abstract Base Class for all Power Supplies."""
 
     @abstractmethod
     def set_voltage(self, voltage: float, channel: int = 0) -> None:
+        """Set the voltage of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
     def measure_voltage(self, channel: int = 0) -> float:
+        """Measure the voltage of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
     def set_current(self, current: float, channel: int = 0) -> None:
+        """Set the current of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
     def measure_current(self, channel: int = 0) -> float:
+        """Measure the current of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
     def enable_output(self, channel: int = 0) -> None:
+        """Enable the output of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
     def disable_output(self, channel: int = 0) -> None:
+        """Disable the output of the power supply."""
         raise NotImplementedError

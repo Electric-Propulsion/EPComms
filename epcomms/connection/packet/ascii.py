@@ -1,3 +1,5 @@
+"""ASCII packet class"""
+
 from . import Packet
 
 

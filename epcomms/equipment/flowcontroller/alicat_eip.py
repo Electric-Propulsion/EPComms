@@ -1,16 +1,21 @@
+"""AlicatEIP class for communication with Alicat EIP flow control devices over EthernetIP"""
+
 from typing import Union
-from epcomms.connection.packet import CIPTX, CIPRX
+from epcomms.connection.packet import CIPTX
+
+# pylint: disable=no-name-in-module
+# It's just some fuckery but it exists
 from epcomms.connection.packet import UINT, REAL, STRING, UDINT, WORD
 from epcomms.connection.transmission import EthernetIP, TransmissionError
 from . import FlowController
 
 
 class AlicatEIP(FlowController):
-    """AlicatEIP class for communication with Alicat devices over EthernetIP"""
+    """AlicatEIP class for communication with Alicat devices over EthernetIP."""
 
     # loop up table for identity elements
-    identity_lut = {
-        "vendor_ID": [1, UINT],
+    _identity_lut = {
+        "vendor_id": [1, UINT],
         "device_type": [2, UINT],
         "product_code": [3, UINT],
         "status": [5, WORD],
@@ -26,26 +31,71 @@ class AlicatEIP(FlowController):
         return self._get_device_readings()["pressure"]
 
     def get_flow_temp(self) -> float:
+        """
+        Retrieves the flow temperature from the device readings.
+
+        Returns:
+            float: The flow temperature value.
+        """
         return self._get_device_readings()["flow_temp"]
 
     def get_volumetric_flow(self) -> float:
+        """
+        Retrieves the volumetric flow reading from the device.
+
+        Returns:
+            float: The current volumetric flow value.
+        """
         return self._get_device_readings()["volumetric_flow"]
 
     def get_mass_flow(self) -> float:
+        """
+        Retrieve the mass flow reading from the device.
+
+        Returns:
+            float: The mass flow value obtained from the device readings.
+        """
         return self._get_device_readings()["mass_flow"]
 
     def get_mass_flow_setpoint(self) -> float:
+        """
+        Retrieves the mass flow setpoint from the device.
+
+        Returns:
+            float: The mass flow setpoint value.
+        """
         return self._get_device_readings()["mass_flow_setpoint"]
 
     def get_mass_total(self) -> float:
+        """
+        Retrieve the total mass flow reading from the device.
+
+        Returns:
+            float: The total mass flow reading.
+        """
         return self._get_device_readings()["mass_total"]
 
     def get_setpoint(self) -> float:
+        """
+        Retrieves the current setpoint value from the flow controller.
+
+        Returns:
+            float: The current setpoint value.
+        """
         packet = CIPTX(class_code=4, instance=100, attribute=3, data_type=REAL)
         response = self.transmission.poll(packet)
         return response.data
 
     def set_setpoint(self, setpoint: float) -> None:
+        """
+        Sets the setpoint for the flow controller.
+
+        Args:
+            setpoint (float): The desired setpoint value to be set on the flow controller.
+
+        Returns:
+            None
+        """
         packet = CIPTX(
             class_code=4,
             instance=100,
@@ -56,22 +106,55 @@ class AlicatEIP(FlowController):
         self.transmission.command(packet)
 
     def tare_flow(self) -> None:
+        """
+        Tares the flow measurement of the Alicat flow controller.
+
+        Returns:
+            None
+        """
         self._send_device_command(4, 2)
 
     def reset_totalizer(self) -> None:
+        """
+        Resets the totalizer of the flow controller.
+
+        Returns:
+            None
+        """
         self._send_device_command(5, 0)
 
     def hold_valves_closed(self) -> None:
+        """
+        Sends a command to hold the valves closed.
+        """
         self._send_device_command(6, 1)
 
     def hold_valves_at_current_position(self) -> None:
+        """
+        Holds the valves at their current position.
+
+        Returns:
+            None
+        """
         self._send_device_command(6, 2)
 
     def release_valves(self) -> None:
+        """
+        Releases the valves of the flow controller.
+
+        Returns:
+            None
+        """
         self._send_device_command(6, 0)
 
     def get_identity_string(self) -> str:
-        vendor_ID = self._get_identity_element("vendor_ID")
+        """
+        Retrieves and constructs a string that represents the identity of the device.
+        Returns:
+            str: A formatted string containing the product name, vendor ID, device type,
+                 product code, and serial number.
+        """
+        vendor_id = self._get_identity_element("vendor_id")
         device_type = self._get_identity_element("device_type")
         product_code = self._get_identity_element("product_code")
         serial_number = self._get_identity_element("serial_number")
@@ -79,9 +162,35 @@ class AlicatEIP(FlowController):
 
         # At least on ours, the product name is missing a leading 'E'.
         # It's not a bug in this code. Probably.
-        return f"{product_name} (Vendor ID: {vendor_ID}, Device Type: {device_type}, Product Code: {product_code}, Serial Number: {serial_number})"
+        return (
+            f"{product_name} (Vendor ID: {vendor_id}, Device Type: {device_type}, "
+            f"Product Code: {product_code}, Serial Number: {serial_number})"
+        )
 
     def get_status(self):
+        """
+        Retrieves the status of the flow controller.
+
+        The status is represented as a dictionary with the following keys:
+        - "temp_overflow": Indicates if there is a temperature overflow.
+        - "temp_underflow": Indicates if there is a temperature underflow.
+        - "volumetric_overflow": Indicates if there is a volumetric overflow.
+        - "volumetric_underflow": Indicates if there is a volumetric underflow.
+        - "mass_overflow": Indicates if there is a mass overflow.
+        - "mass_underflow": Indicates if there is a mass underflow.
+        - "pressure_overflow": Indicates if there is a pressure overflow.
+        - "totalizer_overflow": Indicates if there is a totalizer overflow.
+        - "PID_loop_hold": Indicates if the PID loop is on hold.
+        - "ADC_error": Indicates if there is an ADC error.
+        - "PID_exhaust": Indicates if the PID is in exhaust mode.
+        - "over_pressure_limit": Indicates if the over pressure limit is reached.
+        - "flow_overflow_during_totalize": Indicates if there is a flow overflow
+          during totalization.
+        - "measurement_aborted": Indicates if the measurement was aborted.
+
+        Returns:
+            dict: A dictionary containing the status flags.
+        """
         status = self._get_identity_element("status")
         return {
             "temp_overflow": bool(status & 0b000000000000001),
@@ -101,6 +210,19 @@ class AlicatEIP(FlowController):
         }
 
     def _get_device_readings(self) -> dict:
+        """
+        Retrieves device readings from the flow controller.
+
+        Returns:
+            dict: A dictionary containing the following keys:
+                - "gas" (int): The gas type identifier.
+                - "status" (int): The status of the device.
+                - "gauge_pressure" (float): The gauge pressure reading.
+                - "flow_temp" (float): The flow temperature reading.
+                - "volumetric_flow" (float): The volumetric flow rate.
+                - "mass_flow" (float): The mass flow rate.
+                - "mass_flow_setpoint" (float): The mass flow setpoint.
+        """
         packet = CIPTX(
             class_code=4,
             instance=101,
@@ -120,6 +242,15 @@ class AlicatEIP(FlowController):
         }
 
     def _send_device_command(self, command_id: int, argument: int) -> None:
+        """
+        Sends a command to the device and verifies the response.
+
+        Args:
+            command_id (int): The ID of the command to send.
+            argument (int): The argument to accompany the command.
+        Raises:
+            TransmissionError: If the device does not acknowledge the command correctly.
+        """
         params = UINT.encode(command_id) + UINT.encode(argument)
         print(params)
         packet = CIPTX(class_code=4, instance=102, attribute=3, parameters=params)
@@ -136,11 +267,19 @@ class AlicatEIP(FlowController):
             raise TransmissionError("Device did not acknowledge command.")
 
     def _get_identity_element(self, element: str) -> Union[int, str]:
+        """
+        Retrieves the identity element specified by the given element name.
+        Args:
+            element (str): The name of the identity element to retrieve.
+        Returns:
+            Union[int, str]: The value of the requested identity element,
+            which can be either an integer or a string.
+        """
         packet = CIPTX(
             class_code=1,
             instance=1,
-            attribute=self.identity_lut[element][0],
-            data_type=self.identity_lut[element][1],
+            attribute=self._identity_lut[element][0],
+            data_type=self._identity_lut[element][1],
         )
 
         response = self.transmission.poll(packet)

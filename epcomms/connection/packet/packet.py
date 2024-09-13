@@ -1,3 +1,5 @@
+"""Abstract base class for packets."""
+
 from abc import ABC, abstractmethod
 from typing import Union
 

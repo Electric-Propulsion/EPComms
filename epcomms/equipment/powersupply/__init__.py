@@ -1,2 +1,6 @@
+# pylint: disable=cyclic-import
+# pylint: disable=missing-module-docstring
 from .power_supply import PowerSupply
-from .keysight_edu36311A import KeysightEDU36311A
+
+# pylint: disable=cyclic-import
+from .keysight_edu36311a import KeysightEDU36311A

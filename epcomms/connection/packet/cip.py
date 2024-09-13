@@ -1,7 +1,12 @@
-from . import Packet
-from . import DataType
+"""CIP packet classes"""
+
 from typing import Union
 from pycomm3 import Tag
+from . import Packet
+
+# pylint: disable=no-name-in-module
+# It's just some fuckery but it exists
+from . import DataType
 
 
 class CIPTX(Packet):
@@ -34,22 +39,27 @@ class CIPTX(Packet):
 
     @property
     def class_code(self) -> int:
+        """CIP object class"""
         return self._class_code
 
     @property
     def instance(self) -> int:
+        """CIP object instance"""
         return self._instance
 
     @property
     def attribute(self) -> int:
+        """CIP object attribute"""
         return self._attribute
 
     @property
     def parameters(self) -> Union[list, None]:
+        """CIP object parameters (if any)"""
         return self._parameters
 
     @property
     def data_type(self) -> Union[DataType, None]:
+        """CIP object data type (if any)"""
         return self._data_type
 
     def serialize_str(self) -> str:
@@ -75,10 +85,12 @@ class CIPRX(Packet):
 
     @property
     def data_type(self) -> DataType:
+        """Data type of returned message, for decoding"""
         return self._data_type
 
     @property
     def error(self) -> str:
+        """Error message, if any"""
         return self._error
 
     def serialize_str(self) -> str:
