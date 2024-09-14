@@ -14,4 +14,4 @@ class ASCII(Packet):
         return f"{self._data}"
 
     def serialize_bytes(self) -> bytes:
-        raise NotImplementedError("ASCII packets cannot be serialized to bytes.")
+        return self._data.encode("ascii")
