@@ -6,6 +6,12 @@ for all instruments that can sense the physical environment.
 from abc import ABC
 from epcomms.connection.transmission import Transmission
 
+class MeasurementError(Exception):
+    pass
+
+class CommandError(Exception):
+    pass
+
 
 class Instrument(ABC):
     # pylint: disable=too-few-public-methods

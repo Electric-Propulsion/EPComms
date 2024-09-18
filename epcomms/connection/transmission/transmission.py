@@ -20,6 +20,7 @@ Methods:
 
 from abc import ABC, abstractmethod
 from epcomms.connection.packet import Packet
+import time
 
 
 class TransmissionError(Exception):
@@ -55,4 +56,5 @@ class Transmission(ABC):
         if a transmission method has a more efficient way to poll."""
 
         self.command(data)
+        time.sleep(1)
         return self.read()

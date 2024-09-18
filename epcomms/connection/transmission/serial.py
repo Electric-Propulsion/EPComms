@@ -14,6 +14,6 @@ class Serial(Transmission):
         self.driver.write(data.serialize_bytes())
 
     def read(self) -> ASCII:
-        data = self.driver.read_until(self.terminator)
+        data = self.driver.readline()#(self.terminator)
         packet = self.packet_class(data.decode("ascii")[0:-len(self.terminator)])
         return packet
