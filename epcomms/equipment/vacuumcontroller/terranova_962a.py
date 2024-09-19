@@ -21,21 +21,21 @@ class Terranova962A(VacuumController):
         if unit_str in ["Torr", "mBar"]:
             return unit_str
         else:
-            raise TransmissionError(f"Recieved a bad response ({unit_str})")
+            raise TransmissionError(f"Recieved a bad response: {unit_str} (expected unit)")
         
     def get_identity(self) -> str:
         ident_string = self.transmission.poll(ASCII('v')).data
         if "926" in ident_string:
             return ident_string
         else:
-            raise TransmissionError(f"Recieved a bad response ({ident_string})")
+            raise TransmissionError(f"Recieved a bad response: {ident_string} (expected identity)")
         
     def get_gauge_type(self) -> Union[Literal["CEP", "275"]]:
         gauge_str = self.transmission.poll(ASCII('x')).data
         if gauge_str in ["CEP", "275"]:
             return gauge_str
         else:
-            raise TransmissionError(f"Recieved a bad response ({gauge_str})")
+            raise TransmissionError(f"Recieved a bad response: {gauge_str} (expected gauge type)")
 
     def _get_pressure_gauge_n(self, n: int) -> float:
         press_str = self.transmission.poll(ASCII('p')).data.split(" ")[n]
@@ -50,5 +50,6 @@ class Terranova962A(VacuumController):
                 try:
                     return float(press_str)
                 except ValueError:
-                    raise TransmissionError(f"Recieved a bad response ({press_str})")
+                    print(press_str)
+                    raise TransmissionError(f"Recieved a bad response: {press_str} (expected pressures)")
 
