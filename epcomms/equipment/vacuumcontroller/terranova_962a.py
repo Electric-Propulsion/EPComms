@@ -38,7 +38,7 @@ class Terranova962A(VacuumController):
             raise TransmissionError(f"Recieved a bad response: {gauge_str} (expected gauge type)")
 
     def _get_pressure_gauge_n(self, n: int) -> float:
-        press_str = self.transmission.poll(ASCII('p')).data.split(" ")[n]
+        press_str = self.transmission.poll(ASCII('p')).data.strip().split(" ")[n]
         match press_str:
             case "Low":
                 raise MeasurementError("Pressure out of range (low)")
