@@ -19,4 +19,6 @@ if szerr[0] != b'\0':
 
 # Normal __init__ stuff
 from . import dwfconstants
+from .analog_discovery_DAQ import AnalogDiscoveryDAQ
+from .analog_discovery_function_generator import AnalogDiscoveryFunctionGenerator
 from .analog_discovery import AnalogDiscovery
