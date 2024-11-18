@@ -45,59 +45,92 @@ class KeysightEDU34450A(Multimeter):
         """
         self.transmission.command(ASCII("SYST:BEEP"))
 
-    def measure_voltage_ac(self, range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
-        """Measures AC voltage at a desired resolution using a specified range, on a specified channel.
+    def measure_voltage_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
+        """Measures AC voltage at a desired resolution using a specified measurement range, on a specified channel.
 
         Args:
-            range (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
-            resolution (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            measurement_range (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
+            resolution (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
             channel (str, optional): Select either 'PRIMARY' or 'SECONDARY' multimeter channel. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured voltage value.
         """
-        assert isinstance(range, float) or isinstance(range, int) or range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert isinstance(resolution, float) or isinstance(resolution, int) or range.upper in {'DEF','MAX','MIN'} 
-        assert channel.upper in {'PRIMARY', 'SECONDARY'}
-        range_str = range if isinstance(range, str) else f"{range:.2e}"
+
+        try:
+            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(resolution, (float,int)) or resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+
+        try:
+            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
+        except AssertionError:
+            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
+        
+        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
         return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:AC? {range_str},{resolution_str}")))
     
-    def measure_voltage_dc(self, range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
-        """Measures DC voltage at a desired resolution using a specified range, on a specified channel.
+    def measure_voltage_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
+        """Measures DC voltage at a desired resolution using a specified measurement range, on a specified channel.
 
         Args:
-            range (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
-            resolution (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            measurement_range (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
+            resolution (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
             channel (str, optional): Select either 'PRIMARY' or 'SECONDARY' multimeter channel. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured voltage value.
         """
-        assert isinstance(range, float) or isinstance(range, int) or range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert isinstance(resolution, float) or isinstance(resolution, int) or range.upper in {'DEF','MAX','MIN'} 
-        assert channel.upper in {'PRIMARY', 'SECONDARY'}
-        range_str = range if isinstance(range, str) else f"{range:.2e}"
+        try:
+            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(resolution, (float,int)) or resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+
+        try:
+            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
+        except AssertionError:
+            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
+        
+        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
         return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:DC? {range_str},{resolution_str}")))
     
-    def measure_capacitance(self, range: Union[str|int] = 'AUTO', resolution: Union[str|int] = 'DEF') -> float:
-        """Measures capacitance at a desired resolution using a specified range, on the 'PRIMARY' channel.
+    def measure_capacitance(self, measurement_range: Union[str|int] = 'AUTO', resolution: Union[str|int] = 'DEF') -> float:
+        """Measures capacitance at a desired resolution using a specified measurement range, on the 'PRIMARY' channel.
 
         Args:
-            range (Union[str | int | float], optional): Specify a numeric value (in Farads), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
-            resolution (Union[str | int | float], optional): Specify a numeric value (in Farads), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            measurement_range (Union[str | int | float], optional): Specify a numeric value (in Farads), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
+            resolution (Union[str | int | float], optional): Specify a numeric value (in Farads), or one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
 
         Returns:
             float: The measured capacitance value.
         """
-        assert isinstance(range, float) or isinstance(range, int) or range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert isinstance(resolution, float) or isinstance(resolution, int) or range.upper in {'DEF','MAX','MIN'} 
-        range_str = range if isinstance(range, str) else f"{range:.2e}"
+        try:
+            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(resolution, (float,int)) or resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+        
+        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
         return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CAPACITANCE? {range_str},{resolution_str}")))
     
-    def measure_continuity(self) -> Union[float|str]:
+    def measure_continuity_raw(self) -> float:
         """Performs a 2-wire continuity test.
 
         Returns:
@@ -106,39 +139,71 @@ class KeysightEDU34450A(Multimeter):
         #TODO confirm return value when instrument sees an open circuit (>1.2 kOhm). Programmer guide is unclear.
         return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CONTINUITY?")))
     
-    def measure_current_ac(self, range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
-        """Measures AC current at a desired resolution using a specified range, on a specified channel.
+    def measure_continuity(self) -> bool:
+        """Performs a 2-wire continuity test. The Keysight's internal threshold for continuity is 10 Ohms.
+
+        Returns:
+            bool: True if continuity is detected, otherwise false.
+        """
+        return True if self.measure_continuity_raw() <= 10.0 else False
+    
+    def measure_current_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
+        """Measures AC current at a desired resolution using a specified measurement range, on a specified channel.
 
         Args:
-            range (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
-            resolution (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            measurement_range (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
+            resolution (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
             channel (str, optional): Select either 'PRIMARY' or 'SECONDARY' multimeter channel. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured current value.
         """
-        assert isinstance(range, float) or isinstance(range, int) or range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert isinstance(resolution, float) or isinstance(resolution, int) or range.upper in {'DEF','MAX','MIN'} 
-        assert channel.upper in {'PRIMARY', 'SECONDARY'}
-        range_str = range if isinstance(range, str) else f"{range:.2e}"
+        try:
+            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(resolution, (float,int)) or resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+
+        try:
+            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
+        except AssertionError:
+            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
+        
+        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
         return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:AC? {range_str},{resolution_str}")))
     
-    def measure_current_dc(self, range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
-        """Measures DC current at a desired resolution using a specified range, on a specified channel.
+    def measure_current_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
+        """Measures DC current at a desired resolution using a specified measurement range, on a specified channel.
 
         Args:
-            range (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
-            resolution (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            measurement_range (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
+            resolution (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
             channel (str, optional): Select either 'PRIMARY' or 'SECONDARY' multimeter channel. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured current value.
         """
-        assert isinstance(range, float) or isinstance(range, int) or range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert isinstance(resolution, float) or isinstance(resolution, int) or range.upper in {'DEF','MAX','MIN'} 
-        assert channel.upper in {'PRIMARY', 'SECONDARY'}
-        range_str = range if isinstance(range, str) else f"{range:.2e}"
+        try:
+            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(resolution, (float,int)) or resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+
+        try:
+            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
+        except AssertionError:
+            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
+        
+        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
         return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:DC? {range_str},{resolution_str}")))
     
@@ -151,41 +216,65 @@ class KeysightEDU34450A(Multimeter):
         return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:DIODE?")))
     
     def measure_frequency(self, freq_range: Union[str|int|float] = 'DEF', freq_resolution: Union[str|int|float] = 'DEF', volt_range: Union[str|int|float] = 0.1, channel: str = 'PRIMARY') -> float:
-        """Measures frequency of an AC volage signal at a desired resolution using a specified range, on a specified channel.
+        """Measures frequency of an AC volage signal at a desired resolution using a specified frequency range, on a specified channel.
 
         Before frequency measurement, the AC voltage range is configured. As per the programmer guide, the voltage range should be "at least" 0.1V for accurate frequency measurements.
 
         Args:
             freq_range (Union[str | int | float], optional): Specify a numeric value (in Hz), or one of {DEF|MAX|MIN}. MIN = DEF = 1 Hz, MAX = 1 MHz. Defaults to 'DEF'.
-            freq_resolution (Union[str | int | float], optional): Specify a numeric value (in Hz), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            freq_resolution (Union[str | int | float], optional): Specify a numeric value (in Hz), or one of {DEF|MAX|MIN}. If using autoranging (freq_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
             volt_range (Union[str | int | float], optional): Specify a numeric value (in V), or one of {AUTO|DEF|MAX|MIN}. Defaults to 0.1 V.
             channel (str, optional): Select either 'PRIMARY' or 'SECONDARY' multimeter channel. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured current value.
         """
-        assert isinstance(freq_range, float) or isinstance(freq_range, int) or freq_range.upper in {'DEF','MAX','MIN'} 
-        assert isinstance(freq_resolution, float) or isinstance(freq_resolution, int) or freq_range.upper in {'DEF','MAX','MIN'} 
-        assert isinstance(volt_range, float) or isinstance(volt_range, int) or volt_range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert channel.upper in {'PRIMARY', 'SECONDARY'}
+        try:
+            assert isinstance(freq_range, (float,int)) or freq_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for freq_range. Freq_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(freq_resolution, (float,int)) or freq_resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for freq_resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(volt_range, (float,int)) or volt_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+
+        try:
+            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
+        except AssertionError:
+            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
+
         range_str = freq_range if isinstance(freq_range, str) else f"{freq_range:.2e}"
         resolution_str = freq_resolution if isinstance(freq_resolution, str) else f"{freq_resolution:.2e}"
 
         self.transmission.command(f"SENSE:{channel}:FREQUENCY:VOLTAGE:RANGE {volt_range}")
         return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:FREQUENCY? {range_str},{resolution_str}")))
     
-    def measure_resistance(self, range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF') -> float:
-        """Performs 2-wire resistance measurement at a desired resolution using a specified range, on the PRIMARY channel.
+    def measure_resistance(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF') -> float:
+        """Performs 2-wire resistance measurement at a desired resolution using a specified measurement range, on the PRIMARY channel.
 
         Args:
-            range (Union[str | int | float], optional): Specify a numeric value (in Ohms), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
-            resolution (Union[str | int | float], optional): Specify a numeric value (in Ohms), or one of {DEF|MAX|MIN}. If using autoranging (range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
+            measurement_range (Union[str | int | float], optional): Specify a numeric value (in Ohms), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
+            resolution (Union[str | int | float], optional): Specify a numeric value (in Ohms), or one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
 
         Returns:
             float: The measured resistance value.
         """
-        assert isinstance(range, float) or isinstance(range, int) or range.upper in {'AUTO','DEF','MAX','MIN'} 
-        assert isinstance(resolution, float) or isinstance(resolution, int) or range.upper in {'DEF','MAX','MIN'} 
-        range_str = range if isinstance(range, str) else f"{range:.2e}"
+        try:
+            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+        
+        try:
+            assert isinstance(resolution, (float,int)) or resolution.upper() in {'DEF','MAX','MIN'} 
+        except AssertionError:
+            raise ValueError(f"Invalid value for resolution. Resolution must be a numeric value or one of 'DEF','MAX','MIN'.")
+        
+        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
         return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:RESISTANCE? {range_str},{resolution_str}")))

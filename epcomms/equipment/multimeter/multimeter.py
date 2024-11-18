@@ -12,27 +12,27 @@ class Multimeter(Instrument):
     """Abstract class for all multimeters."""
 
     @abstractmethod
-    def measure_voltage_ac(self, range, resolution, channel) -> float:
+    def measure_voltage_ac(self, measurement_range, resolution, channel) -> float:
         raise NotImplementedError
     
     @abstractmethod
-    def measure_voltage_dc(self, range, resolution, channel) -> float:
+    def measure_voltage_dc(self, measurement_range, resolution, channel) -> float:
         raise NotImplementedError
     
     @abstractmethod
-    def measure_capacitance(self, range, resolution) -> float:
+    def measure_capacitance(self, measurement_range, resolution) -> float:
         raise NotImplementedError
     
     @abstractmethod
-    def measure_continuity(self) -> float:
+    def measure_continuity(self) -> bool:
         raise NotImplementedError
     
     @abstractmethod
-    def measure_current_ac(self, range, resolution, channel) -> float:
+    def measure_current_ac(self, measurement_range, resolution, channel) -> float:
         raise NotImplementedError
     
     @abstractmethod
-    def measure_current_dc(self, range, resolution, channel) -> float:
+    def measure_current_dc(self, measurement_range, resolution, channel) -> float:
         raise NotImplementedError
     
     @abstractmethod
@@ -40,9 +40,9 @@ class Multimeter(Instrument):
         raise NotImplementedError
     
     @abstractmethod
-    def measure_frequency(self, range, resolution, channel) -> float:
+    def measure_frequency(self, freq_range, freq_resolution, volt_range, channel) -> float:
         raise NotImplementedError
     
     @abstractmethod
-    def measure_resistance(self, range, resolution, channel) -> float:
+    def measure_resistance(self, measurement_range, resolution) -> float:
         raise NotImplementedError

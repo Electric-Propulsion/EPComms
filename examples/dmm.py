@@ -12,7 +12,7 @@ print("DC Voltage (autoranging): " + str(meas))
 meas = dmm.measure_voltage_dc(channel='SECONDARY')
 print("DC Voltage (secondary channel): " + str(meas))
 
-meas = dmm.measure_voltage_dc(range=100, resolution=3E-5)
+meas = dmm.measure_voltage_dc(measurement_range=100, resolution=3E-5)
 print("AC Voltage (primary channel; range of 100V and resolution of 3E-5 V): " + str(meas))
 
 meas = dmm.measure_capacitance()
