@@ -1,7 +1,8 @@
 from epcomms.equipment.multimeter.keysight_edu34450a import KeysightEDU34450A
 import time
 
-dmm = KeysightEDU34450A("TCPIP::K-EDU34450A::inst0::INSTR")
+# dmm = KeysightEDU34450A("TCPIP::K-EDU34450A::inst0::INSTR")
+dmm = KeysightEDU34450A("TCPIP::K-34450A-50039::inst0::INSTR")
 #TODO: understand what the transmission is supposed to be and insert the correct string
 
 dmm.beep()
