@@ -32,6 +32,9 @@ class KeysightEDU34450A(Multimeter):
         transmission = Visa(resource_name)
         super().__init__(transmission)
 
+    def close(self) -> None:
+        self.transmission.close()
+
     def beep(self) -> None:
         """
         Sends a command to the multimeter to emit a beep sound.
@@ -74,7 +77,7 @@ class KeysightEDU34450A(Multimeter):
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:AC? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:AC? {range_str},{resolution_str}")).data)
     
     def measure_voltage_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
         """Measures DC voltage at a desired resolution using a specified measurement range, on a specified channel.
@@ -104,7 +107,7 @@ class KeysightEDU34450A(Multimeter):
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:DC? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:DC? {range_str},{resolution_str}")).data)
     
     def measure_capacitance(self, measurement_range: Union[str|int] = 'AUTO', resolution: Union[str|int] = 'DEF') -> float:
         """Measures capacitance at a desired resolution using a specified measurement range, on the 'PRIMARY' channel.
@@ -128,7 +131,7 @@ class KeysightEDU34450A(Multimeter):
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CAPACITANCE? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CAPACITANCE? {range_str},{resolution_str}")).data)
     
     def measure_continuity_raw(self) -> float:
         """Performs a 2-wire continuity test.
@@ -137,7 +140,7 @@ class KeysightEDU34450A(Multimeter):
             float: A resistance reading, as returned by the instrument during continuity tests. 
         """
         #TODO confirm return value when instrument sees an open circuit (>1.2 kOhm). Programmer guide is unclear.
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CONTINUITY?")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CONTINUITY?")).data)
     
     def measure_continuity(self) -> bool:
         """Performs a 2-wire continuity test. The Keysight's internal threshold for continuity is 10 Ohms.
@@ -175,7 +178,7 @@ class KeysightEDU34450A(Multimeter):
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:AC? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:AC? {range_str},{resolution_str}")).data)
     
     def measure_current_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF', channel: str = 'PRIMARY') -> float:
         """Measures DC current at a desired resolution using a specified measurement range, on a specified channel.
@@ -205,7 +208,7 @@ class KeysightEDU34450A(Multimeter):
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:DC? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:DC? {range_str},{resolution_str}")).data)
     
     def measure_diode(self) -> float:
         """Performs a diode test.
@@ -213,7 +216,7 @@ class KeysightEDU34450A(Multimeter):
         Returns:
             float: A voltage reading, as returned by the instrument during diode tests, if the voltage is in the range [0,1.2]. If the signal is greater than 1.2V then the value +9.9e+37 is returned. 
         """
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:DIODE?")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:DIODE?")).data)
     
     def measure_frequency(self, freq_range: Union[str|int|float] = 'DEF', freq_resolution: Union[str|int|float] = 'DEF', volt_range: Union[str|int|float] = 0.1, channel: str = 'PRIMARY') -> float:
         """Measures frequency of an AC volage signal at a desired resolution using a specified frequency range, on a specified channel.
@@ -253,7 +256,7 @@ class KeysightEDU34450A(Multimeter):
         resolution_str = freq_resolution if isinstance(freq_resolution, str) else f"{freq_resolution:.2e}"
 
         self.transmission.command(f"SENSE:{channel}:FREQUENCY:VOLTAGE:RANGE {volt_range}")
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:FREQUENCY? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:FREQUENCY? {range_str},{resolution_str}")).data)
     
     def measure_resistance(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: Union[str|int|float] = 'DEF') -> float:
         """Performs 2-wire resistance measurement at a desired resolution using a specified measurement range, on the PRIMARY channel.
@@ -277,4 +280,15 @@ class KeysightEDU34450A(Multimeter):
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
         resolution_str = resolution if isinstance(resolution, str) else f"{resolution:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:RESISTANCE? {range_str},{resolution_str}")))
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:RESISTANCE? {range_str},{resolution_str}")).data)
+    
+    def read_errors(self):
+        i = 0
+        while True:
+            err = self.transmission.poll(ASCII(f"SYST:ERR?")).data
+            print(err)
+            i += 1
+            if err == '+0, "No error"' or i >= 20:
+                break
+
+

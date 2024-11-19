@@ -2,7 +2,8 @@ from epcomms.equipment.powersupply import KeysightEDU36311A
 import time
 
 
-psu = KeysightEDU36311A("TCPIP::K-EDU36311A::inst0::INSTR")
+# psu = KeysightEDU36311A("TCPIP::K-EDU36311A::inst0::INSTR")
+psu = KeysightEDU36311A("TCPIP::192.168.0.145::INSTR")
 
 psu.beep()
 
@@ -34,3 +35,5 @@ for channel in range(1,4):
     psu.disable_output(channel)
 
 psu.beep()
+
+psu.close()
