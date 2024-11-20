@@ -7,16 +7,13 @@ dmm = KeysightEDU34450A("TCPIP::192.168.0.121::INSTR")
 dmm.beep()
 
 meas = dmm.measure_voltage_dc()
-print("DC Voltage (autoranging): " + str(meas))
+print("DC Voltage (primary channel; autoranging): " + str(meas))
 
 meas = dmm.measure_voltage_dc(measurement_range=100)
-print("DC Voltage (autoranging): " + str(meas))
+print("DC Voltage (primary channel; range of 100V): " + str(meas))
 
-# meas = dmm.measure_voltage_dc(channel='SECONDARY')
-# print("DC Voltage (secondary channel): " + str(meas))
-
-# meas = dmm.measure_voltage_dc(measurement_range=100, resolution=3E-5)
-# print("DC Voltage (primary channel; range of 100V and resolution of 3E-5 V): " + str(meas))
+meas = dmm.measure_voltage_dc(measurement_range=100, resolution='MIN')
+print("DC Voltage (primary channel; range of 100V and MIN resolution): " + str(meas))
 
 meas = dmm.measure_capacitance()
 print("Capacitance (autoranging): " + str(meas))
@@ -26,9 +23,6 @@ print("Continuity [Resistance]: " + str(meas))
 
 meas = dmm.measure_diode()
 print("Diode [Voltage]: " + str(meas))
-
-# meas = dmm.measure_resistance()
-# print("Resistance: " + str(meas))
 
 # dmm.read_errors()
 
