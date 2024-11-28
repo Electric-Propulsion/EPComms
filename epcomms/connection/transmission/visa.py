@@ -37,7 +37,8 @@ class Visa(Transmission):
         Returns:
             list: A list of strings, each representing a VISA resource identifier.
         """
-        return pyvisa.ResourceManager("@py").list_resources()
+        return pyvisa.ResourceManager().list_resources()
+        # return pyvisa.ResourceManager("@py").list_resources()
 
     def __init__(self, resource_name: str) -> None:
         """
@@ -49,7 +50,9 @@ class Visa(Transmission):
         Returns:
             None
         """
-        self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
+        self.device = pyvisa.ResourceManager().open_resource(resource_name)
+        # self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
+        self.device.timeout = 500
         super().__init__(ASCII)
 
     def command(self, data: ASCII) -> None:
