@@ -4,6 +4,12 @@ controller = Terranova962A('/dev/ttyUSB0')
 
 print(controller.get_gauge_type())
 print(controller.get_identity())
-print(controller.get_pressure_gauge_1())
+try:
+    print(controller.get_pressure_gauge_1())
+except:
+    pass
 print(controller.get_units())
-print(controller.get_pressure_gauge_2())
+try:
+    print(controller.get_pressure_gauge_2())
+except:
+    pass
