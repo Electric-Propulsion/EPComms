@@ -42,7 +42,7 @@ class Terranova962A(VacuumController):
         match press_str:
             case "Low":
                 raise MeasurementError("Pressure out of range (low)")
-            case "999e+0":
+            case "Hi":
                 raise MeasurementError("Pressure out of range (high)")
             case "Off":
                 raise MeasurementError("Gauge off")

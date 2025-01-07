@@ -10,6 +10,7 @@ python = "^3.12"
 pyvisa = "^1.14.1"
 pycomm3 = "^1.2.14"
 pyserial = "^3.5"
+pyvisa-py = "^0.7.2"
 
 
 [tool.poetry.group.dev.dependencies]

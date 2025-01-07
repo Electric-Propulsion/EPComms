@@ -1,9 +1,44 @@
+"""
+This module defines the abstract base class `Multimeter` for all multimeters.
+"""
 # pylint: disable=missing-module-docstring
-# TODO: Implement the Multimeter class # pylint: disable=fixme
+
+from abc import abstractmethod
+from typing import Union
 from epcomms.equipment.base import Instrument
 
 
 class Multimeter(Instrument):
-    # pylint: disable=missing-class-docstring
-    # pylint: disable=too-few-public-methods
-    pass
+    """Abstract class for all multimeters."""
+
+    @abstractmethod
+    def measure_voltage_ac(self, measurement_range, resolution, channel) -> float:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_voltage_dc(self, measurement_range, resolution, channel) -> float:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_capacitance(self, measurement_range, resolution) -> float:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_continuity(self) -> bool:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_current_ac(self, measurement_range, resolution, channel) -> float:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_current_dc(self, measurement_range, resolution, channel) -> float:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_diode(self) -> float:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def measure_frequency(self, freq_range, freq_resolution, volt_range, channel) -> float:
+        raise NotImplementedError

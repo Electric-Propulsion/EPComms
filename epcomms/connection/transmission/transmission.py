@@ -58,3 +58,6 @@ class Transmission(ABC):
         self.command(data)
         time.sleep(1)
         return self.read()
+
+    def close(self) -> None:
+        pass
