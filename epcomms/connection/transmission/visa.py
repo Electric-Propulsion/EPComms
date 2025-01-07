@@ -50,12 +50,16 @@ class Visa(Transmission):
         Returns:
             None
         """
-        for i in range(10):
+        num_attempts = 10
+        for i in range(num_attempts):
             try:
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
                 self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
-            except pyvisa.errors.VisaIOError:
-                continue
+            except pyvisa.errors.VisaIOError as e:
+                if i == num_attempts-1:
+                    raise(e)
+                else:
+                    continue
             break
         self.device.timeout = 5000
         super().__init__(ASCII)
