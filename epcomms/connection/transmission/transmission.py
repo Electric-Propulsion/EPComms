@@ -21,6 +21,7 @@ Methods:
 from abc import ABC, abstractmethod
 from epcomms.connection.packet import Packet
 import time
+from threading import Lock
 
 
 class TransmissionError(Exception):
@@ -40,24 +41,34 @@ class Transmission(ABC):
             raise TypeError("packet_class must be of type Packet")
 
         self.packet_class = packet_class
+        self._lock = Lock()
 
     @abstractmethod
-    def command(self, data: Packet) -> None:
+    def _command(self, data: Packet) -> None:
         """Send a packet of data to the connected device, i.e. 'transmit' data."""
         raise NotImplementedError("This is an abstract method!")
 
     @abstractmethod
-    def read(self) -> Packet:
+    def _read(self) -> Packet:
         """Recieve a packet of data from the connected device."""
         raise NotImplementedError("This is an abstract method!")
+
+    def command(self, data: Packet) -> None:
+        with self._lock:
+            self._command(data)
+    
+    def read(self) -> Packet:
+        with self._lock:
+            return self._read()
+
 
     def poll(self, data: Packet) -> Packet:
         """Default implementation of 'polling' for data, should be overridden
         if a transmission method has a more efficient way to poll."""
 
-        self.command(data)
-        time.sleep(1)
-        return self.read()
+        with self._lock:
+            self._command(data)
+            return self._read()
 
     def close(self) -> None:
         pass

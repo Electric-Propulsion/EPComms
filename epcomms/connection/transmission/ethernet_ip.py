@@ -49,7 +49,7 @@ class EthernetIP(Transmission):
         self.driver = CIPDriver(device_path)
         super().__init__(CIPRX)
 
-    def command(self, data: CIPTX):
+    def _command(self, data: CIPTX):
         """Send a command to the device
 
         Args:
@@ -72,7 +72,7 @@ class EthernetIP(Transmission):
             print(repsonse_tag)
             raise TransmissionError()
 
-    def read(self):
+    def _read(self):
         raise NotImplementedError(
             "EthernetIP does not support read operations. You must poll for data."
         )
