@@ -29,3 +29,5 @@ class Instrument(ABC):
 
     def close(self) -> None:
         self.transmission.close()
+
+    

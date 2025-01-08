@@ -6,6 +6,8 @@ This module provides the Visa class for handling VISA
 import pyvisa
 from epcomms.connection.packet import Packet, ASCII
 from . import Transmission
+from threading import Lock
+import time
 
 
 class Visa(Transmission):
@@ -24,7 +26,7 @@ class Visa(Transmission):
             Reads data from the connected device and returns it as a Packet object.
     """
 
-    device: pyvisa.resources
+    class_lock: Lock = Lock()
 
     @classmethod
     def list_resources(cls) -> list:
@@ -38,7 +40,10 @@ class Visa(Transmission):
             list: A list of strings, each representing a VISA resource identifier.
         """
         # return pyvisa.ResourceManager().list_resources()
-        return pyvisa.ResourceManager("@py").list_resources()
+        cls.class_lock.acquire()
+        resources = pyvisa.ResourceManager("@py").list_resources()
+        cls.class_lock.release()
+        return resources
 
     def __init__(self, resource_name: str) -> None:
         """
@@ -50,14 +55,19 @@ class Visa(Transmission):
         Returns:
             None
         """
+        self.device: pyvisa.resources = None
+
         for i in range(10):
             try:
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
                 self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
-            except pyvisa.errors.VisaIOError:
+            except pyvisa.errors.VisaIOError as e:
+                if i >= 9:
+                    raise(e)
                 continue
             break
         self.device.timeout = 5000
+        self.lock = Lock()
         super().__init__(ASCII)
 
     def command(self, data: ASCII) -> None:
@@ -72,7 +82,14 @@ class Visa(Transmission):
         AssertionError: If the provided data is not an instance of the ASCII class.
         """
         assert isinstance(data, ASCII)
-        self.device.write(data.serialize_str())
+        self.lock.acquire()
+        try:
+            self.device.write(data.serialize_str())
+        except Exception as e:
+            raise e
+        finally:
+            time.sleep(1)
+            self.lock.release()
 
     def read(self) -> Packet:
         """
@@ -81,7 +98,14 @@ class Visa(Transmission):
         Returns:
             Packet: The data read from the device, encapsulated in a Packet object.
         """
-        packet = self.packet_class(self.device.read())
+        self.lock.acquire()
+        try:
+            packet = self.packet_class(self.device.read())
+        except Exception as e:
+            raise e
+        finally:
+            time.sleep(1)
+            self.lock.release()
         return packet
     
     def close(self) -> None:
