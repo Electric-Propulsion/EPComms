@@ -27,6 +27,7 @@ class Visa(Transmission):
     """
 
     class_lock: Lock = Lock()
+    resource_manager = pyvisa.ResourceManager('@py')
 
     @classmethod
     def list_resources(cls) -> list:
@@ -41,7 +42,7 @@ class Visa(Transmission):
         """
         # return pyvisa.ResourceManager().list_resources()
         cls.class_lock.acquire()
-        resources = pyvisa.ResourceManager("@py").list_resources()
+        resources = cls.resource_manager.list_resources('?*')
         cls.class_lock.release()
         return resources
 
@@ -60,7 +61,7 @@ class Visa(Transmission):
             try:
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
                 self.class_lock.acquire()
-                self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
+                self.device = self.resource_manager.open_resource(resource_name)
             except pyvisa.errors.VisaIOError as e:
                 if i == num_attempts-1:
                     raise(e)
