@@ -81,7 +81,7 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured voltage value.
         """
-        return float(self.transmission.poll(ASCII(f"MEAS:VOLT? (@{channel})")).data)
+        return float(self.transmission.poll(ASCII(f"VOLT? (@{channel})")).data)
 
     def set_current(self, current: float, channel: int = 0) -> None:
         """
@@ -106,7 +106,9 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured current in amperes.
         """
-        return float(self.transmission.poll(ASCII(f"MEAS:CURR? (@{channel})")).data)
+        #return float(self.transmission.poll(ASCII(f"CURR?")).data)
+        return float(self.transmission.poll(ASCII(f"CURR? (@{channel})")).data)
+
 
     def enable_output(self, channel: int = 0) -> None:
         """
