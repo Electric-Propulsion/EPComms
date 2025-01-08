@@ -40,11 +40,11 @@ class PowerSupply(Instrument):
         raise NotImplementedError
 
     @abstractmethod
-    def enable_output(self, channel: int = 0) -> None:
+    def get_output(self, channel: int = 0) -> None:
         """Enable the output of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
-    def disable_output(self, channel: int = 0) -> None:
+    def set_output(self, channel: int = 0) -> None:
         """Disable the output of the power supply."""
         raise NotImplementedError
