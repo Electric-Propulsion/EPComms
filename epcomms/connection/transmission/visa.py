@@ -60,17 +60,19 @@ class Visa(Transmission):
         for i in range(10):
             try:
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
+                self.class_lock.acquire()
                 self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
             except pyvisa.errors.VisaIOError as e:
                 if i >= 9:
                     raise(e)
                 continue
+            finally:
+                self.class_lock.release()
             break
-        self.device.timeout = 5000
-        self.lock = Lock()
+        self.device.timeout = 2500
         super().__init__(ASCII)
 
-    def command(self, data: ASCII) -> None:
+    def _command(self, data: ASCII) -> None:
         """
         Sends a command to the device.
 
@@ -82,31 +84,31 @@ class Visa(Transmission):
         AssertionError: If the provided data is not an instance of the ASCII class.
         """
         assert isinstance(data, ASCII)
-        self.lock.acquire()
         try:
             self.device.write(data.serialize_str())
         except Exception as e:
             raise e
-        finally:
-            time.sleep(1)
-            self.lock.release()
 
-    def read(self) -> Packet:
+    def _read(self) -> Packet:
         """
         Reads data from the device and returns it as a Packet object.
 
         Returns:
             Packet: The data read from the device, encapsulated in a Packet object.
         """
-        self.lock.acquire()
         try:
             packet = self.packet_class(self.device.read())
         except Exception as e:
             raise e
-        finally:
-            time.sleep(1)
-            self.lock.release()
+        
         return packet
+    
+    def poll(self, data: ASCII) -> Packet:
+        with self._lock:
+            try:
+                return self.packet_class(self.device.query(data.serialize_str()))
+            except Exception as e:
+                raise e
     
     def close(self) -> None:
         self.device.close()
