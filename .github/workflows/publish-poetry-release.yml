@@ -8,6 +8,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,7 +29,9 @@ jobs:
       - name: Build package
         run: poetry build
 
+      # Create a release
       - name: Create GitHub Release
+        id: create_release  # Assign an ID to access outputs
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,10 +43,11 @@ jobs:
           draft: false
           prerelease: false
 
+      # Upload the package artifact to the release
       - name: Upload package to release
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/*.whl
           asset_name: ${{ github.ref_name }}.whl
           asset_content_type: application/zip
