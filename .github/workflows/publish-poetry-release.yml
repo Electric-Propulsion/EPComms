@@ -70,13 +70,3 @@ jobs:
           asset_path: ${{ env.TAR_FILE }}
           asset_name: ${{ github.ref_name }}.tar.gz
           asset_content_type: application/gzip
-
-      - name: Configure Poetry to use GitHub Packages
-        run: poetry config repositories.github-pkg "https://pypi.github.com/${{ github.repository_owner }}"
-
-      - name: Publish to GitHub Packages
-        env:
-          # Tells Poetry how to authenticate for the 'github-pkg' repository
-          POETRY_HTTP_BASIC_GITHUB_PKG_USERNAME: ${{ github.actor }}
-          POETRY_HTTP_BASIC_GITHUB_PKG_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: poetry publish --repository github-pkg
