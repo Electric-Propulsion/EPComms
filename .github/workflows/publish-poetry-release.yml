@@ -77,6 +77,6 @@ jobs:
       - name: Publish to GitHub Packages
         env:
           # Tells Poetry how to authenticate for the 'github-pkg' repository
-          POETRY_HTTP_BASIC_GITHUB-PKG_USERNAME: ${{ github.actor }}
-          POETRY_HTTP_BASIC_GITHUB-PKG_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          POETRY_HTTP_BASIC_GITHUB_PKG_USERNAME: ${{ github.actor }}
+          POETRY_HTTP_BASIC_GITHUB_PKG_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: poetry publish --repository github-pkg
