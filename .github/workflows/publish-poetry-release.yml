@@ -45,10 +45,24 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload package to release
-        uses: actions/upload-release-asset@v1.0.2 
+      - name: Find dist files
+        id: find_files
+        run: |
+          echo "WHL_FILE=$(ls dist/*.whl)" >> $GITHUB_ENV
+          echo "TAR_FILE=$(ls dist/*.tar.gz)" >> $GITHUB_ENV
+
+      - name: Upload .whl file
+        uses: actions/upload-release-asset@v1.0.2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/*.whl
+          asset_path: ${{ env.WHL_FILE }}
           asset_name: ${{ github.ref_name }}.whl
           asset_content_type: application/zip
+
+      - name: Upload .tar.gz file
+        uses: actions/upload-release-asset@v1.0.2
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.TAR_FILE }}
+          asset_name: ${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
