@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.12'
 
       - name: Install Poetry
         run: |
@@ -29,12 +29,12 @@ jobs:
       - name: Build package
         run: poetry build
 
-      # Create a release
+      - name: Check dist directory
+        run: ls -al dist/
+
       - name: Create GitHub Release
-        id: create_release  # Assign an ID to access outputs
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: actions/create-release@v1.1.4
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
@@ -43,11 +43,10 @@ jobs:
           draft: false
           prerelease: false
 
-      # Upload the package artifact to the release
       - name: Upload package to release
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v1.0.2 
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/*.whl
+          asset_path: dist/
           asset_name: ${{ github.ref_name }}.whl
           asset_content_type: application/zip
