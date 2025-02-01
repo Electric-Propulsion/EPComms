@@ -13,7 +13,7 @@ class PowerSupply(Instrument):
     def set_voltage(self, voltage: float, channel: int = 0) -> None:
         """Set the voltage of the power supply."""
         raise NotImplementedError
-    
+
     @abstractmethod
     def measure_voltage_setpoint(self, channel: int = 0) -> float:
         """Measure the voltage of the power supply."""
@@ -28,7 +28,7 @@ class PowerSupply(Instrument):
     def set_current_limit(self, current: float, channel: int = 0) -> None:
         """Set the current of the power supply."""
         raise NotImplementedError
-    
+
     @abstractmethod
     def measure_current_limit(self, channel: int = 0) -> float:
         """Measure the current of the power supply."""
@@ -41,10 +41,10 @@ class PowerSupply(Instrument):
 
     @abstractmethod
     def get_output(self, channel: int = 0) -> None:
-        """Enable the output of the power supply."""
+        """Get the output status of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
     def set_output(self, channel: int = 0) -> None:
-        """Disable the output of the power supply."""
+        """Set the output status of the power supply."""
         raise NotImplementedError
