@@ -32,9 +32,9 @@ class Socket(Transmission):
 
     def poll(self, data: dict) -> dict:
         try:
-            response = asyncio.run_coroutine_threadsafe(
-                self._async_poll(data), self._loop
-            )
+            response = json.loads(asyncio.run(
+                self._async_poll(data)
+            ))
         except Exception as e:
             raise TransmissionError(e) from e
 

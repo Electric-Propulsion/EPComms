@@ -13,7 +13,7 @@ class BK1694(PowerSupply):
     def __init__(self, ip: str):
         self.ip = ip  # Ours is "192.168.0.156"
         self.ws_url = f"ws://{self.ip}:7777"  # shouldn't hardcode port
-        self.socket = Socket(self.ws_url)
+        self.transmission = Socket(self.ws_url)
 
     def set_voltage(self, voltage: float) -> dict:
         """Set the voltage.
@@ -23,8 +23,8 @@ class BK1694(PowerSupply):
                 Will be accurate to the ± 0.12 V because the user-provided
                 voltage is mapped to an integer between 0-255.
         """
-        data = {"command": "setValue", "value": int(voltage * 255 / 30)}
-        self.socket.poll(data)
+        data = {"command": "setValue", "value": self._convert_voltage_to_value(voltage)}
+        self.transmission.poll(data)
 
     def measure_voltage_setpoint(self):
         """Measure the voltage setpoint."""
@@ -68,7 +68,7 @@ class BK1694(PowerSupply):
             dict: Response from ESP32 server.
         """
         data = {"command": "enable", "value": state}
-        self.socket.poll(data)
+        self.transmission.poll(data)
 
     def _get_status(self) -> dict:
         """Gets system status.
@@ -77,7 +77,7 @@ class BK1694(PowerSupply):
             dict: Response from ESP32 server.
         """
         data = {"command": "getStatus"}
-        response = self.socket.poll(data)
+        response = self.transmission.poll(data)
         return response
 
     def _convert_value_to_voltage(self, value: int) -> float:

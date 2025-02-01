@@ -37,7 +37,7 @@ class Transmission(ABC):
         # TODO: Is there a way to type hint this? # pylint: disable=fixme
         # TODO: We should check if the packet is concrete # pylint: disable=fixme
         # TODO: Is there a way to check this without instantiating the object? # pylint: disable=fixme #(I'm working on it!)
-        if not issubclass(packet_class, Packet):
+        if not issubclass(packet_class, (Packet, dict)):
             raise TypeError("packet_class must be of type Packet")
 
         self.packet_class = packet_class
