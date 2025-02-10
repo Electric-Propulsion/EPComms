@@ -69,9 +69,8 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             None
         """
-        self.transmission.command(ASCII(f":INST:NSEL {channel}"))
-        self.transmission.command(ASCII(f":SOUR:VOLT:LEV:IMM:AMPL {voltage}"))
-
+        self.transmission.command(ASCII(f"VOLT {voltage},(@{channel})"))
+        
     def measure_voltage_setpoint(self, channel: int = 0) -> float:
         """
         Measures the voltage on the specified channel of the Keysight EDU36311A power supply.
@@ -82,9 +81,8 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured voltage value.
         """
-        self.transmission.command(ASCII(f":INST:NSEL {channel}"))
-        return float(self.transmission.poll(ASCII("SOUR:VOLT:LEV:IMM:AMPL?")).data)
-
+        return float(self.transmission.poll(ASCII(f"VOLT? (@{channel})")).data)
+    
     def measure_voltage(self, channel: int = 0) -> float:
         """
         Measures the voltage on the specified channel of the Keysight EDU36311A power supply.
@@ -95,9 +93,7 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured voltage value.
         """
-        return float(
-            self.transmission.poll(ASCII(f":MEAS:SCAL:VOLT:DC? CH{channel}")).data
-        )
+        return float(self.transmission.poll(ASCII(f"MEAS:VOLT? (@{channel})")).data)
 
     def set_current_limit(self, current: float, channel: int = 0) -> None:
         """
@@ -110,8 +106,7 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             None
         """
-        self.transmission.command(ASCII(f":INST:NSEL {channel}"))
-        self.transmission.command(ASCII(f":SOUR:CURR:LEV:IMM:AMPL {current}"))
+        self.transmission.command(ASCII(f"CURR {current},(@{channel})"))
 
     def measure_current_limit(self, channel: int = 0) -> float:
         """
@@ -123,8 +118,8 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured current in amperes.
         """
-        self.transmission.command(ASCII(f":INST:NSEL {channel}"))
-        return float(self.transmission.poll(ASCII(":SOUR:CURR:LEV:IMM:AMPL?")).data)
+        return float(self.transmission.poll(ASCII(f"CURR? (@{channel})")).data)
+
 
     def measure_current(self, channel: int = 0) -> float:
         """
@@ -136,14 +131,12 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured current in amperes.
         """
-        return float(
-            self.transmission.poll(ASCII(f":MEAS:SCAL:CURR:DC? CH{channel}")).data
-        )
+        return float(self.transmission.poll(ASCII(f"MEAS:CURR? (@{channel})")).data)        )
+    
 
     def get_output(self, channel: int = 0) -> None:
-        self.transmission.command(ASCII(f":INST:NSEL {channel}"))
-        return float(self.transmission.poll(ASCII(":OUTPut:STATe?")).data)
-
+        return int(self.transmission.poll(ASCII(f":OUTP? (@{channel})")).data)
+    
     def set_output(self, state: bool, channel: int = 0) -> None:
         """
         Enables the output for the specified channel on the Keysight EDU36311A power supply.
@@ -154,5 +147,4 @@ class KeysightEDU36311A(PowerSupply):
 
         value = 1 if state else 0
 
-        self.transmission.command(ASCII(f":INST:NSEL {channel}"))
-        self.transmission.command(ASCII(f":OUTPut:STATe {value}"))
+        self.transmission.command(ASCII(f"OUTP {value},(@{channel})"))

@@ -45,6 +45,6 @@ class PowerSupply(Instrument):
         raise NotImplementedError
 
     @abstractmethod
-    def set_output(self, channel: int = 0) -> None:
+    def set_output(self, state: bool, channel: int = 0) -> None:
         """Set the output status of the power supply."""
         raise NotImplementedError
