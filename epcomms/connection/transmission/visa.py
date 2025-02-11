@@ -6,6 +6,8 @@ This module provides the Visa class for handling VISA
 import pyvisa
 from epcomms.connection.packet import Packet, ASCII
 from . import Transmission
+from threading import Lock
+import time
 
 
 class Visa(Transmission):
@@ -24,7 +26,8 @@ class Visa(Transmission):
             Reads data from the connected device and returns it as a Packet object.
     """
 
-    device: pyvisa.resources
+    class_lock: Lock = Lock()
+    resource_manager = pyvisa.ResourceManager('@py')
 
     @classmethod
     def list_resources(cls) -> list:
@@ -38,7 +41,10 @@ class Visa(Transmission):
             list: A list of strings, each representing a VISA resource identifier.
         """
         # return pyvisa.ResourceManager().list_resources()
-        return pyvisa.ResourceManager("@py").list_resources()
+        cls.class_lock.acquire()
+        resources = cls.resource_manager.list_resources('?*')
+        cls.class_lock.release()
+        return resources
 
     def __init__(self, resource_name: str) -> None:
         """
@@ -54,17 +60,18 @@ class Visa(Transmission):
         for i in range(num_attempts):
             try:
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
-                self.device = pyvisa.ResourceManager("@py").open_resource(resource_name)
+                self.class_lock.acquire()
+                self.device = self.resource_manager.open_resource(resource_name)
             except pyvisa.errors.VisaIOError as e:
-                if i == num_attempts-1:
-                    raise(e)
+                if i == num_attempts - 1:
+                    raise (e)
                 else:
                     continue
             break
-        self.device.timeout = 5000
+        self.device.timeout = 2500
         super().__init__(ASCII)
 
-    def command(self, data: ASCII) -> None:
+    def _command(self, data: ASCII) -> None:
         """
         Sends a command to the device.
 
@@ -76,17 +83,31 @@ class Visa(Transmission):
         AssertionError: If the provided data is not an instance of the ASCII class.
         """
         assert isinstance(data, ASCII)
-        self.device.write(data.serialize_str())
+        try:
+            self.device.write(data.serialize_str())
+        except Exception as e:
+            raise e
 
-    def read(self) -> Packet:
+    def _read(self) -> Packet:
         """
         Reads data from the device and returns it as a Packet object.
 
         Returns:
             Packet: The data read from the device, encapsulated in a Packet object.
         """
-        packet = self.packet_class(self.device.read())
+        try:
+            packet = self.packet_class(self.device.read())
+        except Exception as e:
+            raise e
+
         return packet
-    
+
+    def poll(self, data: ASCII) -> Packet:
+        with self._lock:
+            try:
+                return self.packet_class(self.device.query(data.serialize_str()))
+            except Exception as e:
+                raise e
+
     def close(self) -> None:
         self.device.close()
