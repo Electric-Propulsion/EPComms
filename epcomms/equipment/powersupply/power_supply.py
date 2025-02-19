@@ -46,6 +46,6 @@ class PowerSupply(Instrument):
         raise NotImplementedError
 
     @abstractmethod
-    def disable_output(self, channel: Union[int, list[int]]) -> None:
-        """Disable the output of the power supply."""
+    def set_output(self, state: bool, channel: Union[int, list[int]]) -> None:
+        """Set the output of the power supply."""
         raise NotImplementedError
