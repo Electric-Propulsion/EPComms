@@ -19,10 +19,13 @@ class SCPIInstrument:
             str: The SCPI command string.
         """
         if isinstance(channels, list):
+            channels = list(filter(None, channels))
             channels = ",".join([str(ch) for ch in channels])
 
         if isinstance(arguments, list):
+            arguments = list(filter(None, arguments))
             arguments = ",".join(arguments)
+
 
         return f"{command_keyword}{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channels})" if channels else ''}"
 
@@ -40,9 +43,11 @@ class SCPIInstrument:
             str: The SCPI query string.
         """
         if isinstance(channels, list):
+            channels = list(filter(None, channels))
             channels = ",".join([str(ch) for ch in channels])
 
         if isinstance(arguments, list):
+            arguments = list(filter(None, arguments))
             arguments = ",".join(arguments)
 
 

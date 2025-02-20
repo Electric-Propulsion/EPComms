@@ -34,11 +34,7 @@ class Multimeter(Instrument):
     @abstractmethod
     def measure_current_dc(self, measurement_range, resolution) -> float:
         raise NotImplementedError
-    
-    @abstractmethod
-    def measure_diode(self) -> float:
-        raise NotImplementedError
-    
+        
     @abstractmethod
     def measure_frequency(self, freq_range, freq_resolution, volt_range) -> float:
         raise NotImplementedError

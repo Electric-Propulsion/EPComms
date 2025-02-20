@@ -6,8 +6,9 @@ from epcomms.connection.packet import Packet
 
 class Telnet(Transmission):
 
-    def __init__(self, host: str, port: int, terminator: str, packet_class: type):
-        self.driver = telnetlib.Telnet(host, port)
+    def __init__(self, host: str, port: int, terminator: str, timeout:float, packet_class: type):
+        self.driver = telnetlib.Telnet(host, port, timeout)
+        self._timeout = timeout
         self.terminator = terminator.encode("ascii")
         super().__init__(packet_class)
 
@@ -17,9 +18,12 @@ class Telnet(Transmission):
         self.driver.write(data.serialize_bytes()+self.terminator)
 
     def _read(self) -> Packet:
-        data = self.driver.read_until(self.terminator)
+        data = self.driver.read_until(self.terminator, self._timeout)
         packet = self.packet_class(data.decode("ascii")[0:-len(self.terminator)])
         return packet
+    
+    def close(self):
+        self.driver.close()
 
 
 
