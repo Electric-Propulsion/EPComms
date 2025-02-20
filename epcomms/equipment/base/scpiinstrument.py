@@ -4,8 +4,8 @@ from typing import Union
 class SCPIInstrument:
     # Yar, it be a mixin!
 
-    def command_by_channel(
-        self, command_keyword: str, argument: str, channel: Union[int, list[int]]
+    def generate_command(
+        self, command_keyword: str, arguments: Union[str, list[str], None] = None, channels: Union[int, list[int], None] = None
     ) -> str:
         """
         Generates a SCPI command string.
@@ -18,13 +18,16 @@ class SCPIInstrument:
         Returns:
             str: The SCPI command string.
         """
-        if isinstance(channel, list):
-            channel = ",".join([str(ch) for ch in channel])
+        if isinstance(channels, list):
+            channels = ",".join([str(ch) for ch in channels])
 
-        return f"{command_keyword} {argument},(@{channel})"
+        if isinstance(arguments, list):
+            arguments = ",".join(arguments)
 
-    def query_by_channel(
-        self, query_keyword: str, channel: Union[int, list[int]]
+        return f"{command_keyword}{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channels})" if channels else ''}"
+
+    def generate_query(
+        self, query_keyword: str, arguments: Union[str, list[str], None] = None, channels: Union[int, list[int], None] = None
     ) -> str:
         """
         Generates a SCPI query string.
@@ -36,7 +39,11 @@ class SCPIInstrument:
         Returns:
             str: The SCPI query string.
         """
-        if isinstance(channel, list):
-            channel = ",".join([str(ch) for ch in channel])
+        if isinstance(channels, list):
+            channels = ",".join([str(ch) for ch in channels])
 
-        return f"{query_keyword}? (@{channel})"
+        if isinstance(arguments, list):
+            arguments = ",".join(arguments)
+
+
+        return f"{query_keyword}?{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channels})" if channels else ''}"

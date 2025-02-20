@@ -50,7 +50,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             None
         """
         self.transmission.command(
-            ASCII(self.command_by_channel("VOLT", str(voltage), channel))
+            ASCII(self.generate_command("VOLT", arguments=str(voltage), channels=channel))
         )
 
     def measure_voltage_setpoint(self, channel: Union[int, list[int]]) -> float:
@@ -64,7 +64,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             float: The measured voltage value.
         """
         return float(
-            self.transmission.poll(ASCII(self.query_by_channel("VOLT", channel)).data)
+            self.transmission.poll(ASCII(self.generate_query("VOLT", channels=channel)).data)
         )
 
     def measure_voltage(self, channel: Union[int, list[int]]) -> float:
@@ -79,7 +79,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         """
         return float(
             self.transmission.poll(
-                ASCII(self.query_by_channel("MEAS:VOLT", channel)).data
+                ASCII(self.generate_query("MEAS:VOLT", channels=channel)).data
             )
         )
 
@@ -95,7 +95,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             None
         """
         self.transmission.command(
-            ASCII(self.command_by_channel("CURR", str(current), channel))
+            ASCII(self.generate_command("CURR", arguments=str(current), channels=channel))
         )
 
     def measure_current_limit(self, channel: Union[int, list[int]]) -> float:
@@ -109,7 +109,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             float: The measured current in amperes.
         """
         return float(
-            self.transmission.poll(ASCII(self.query_by_channel("CURR", channel))).data
+            self.transmission.poll(ASCII(self.generate_query("CURR", channels=channel))).data
         )
 
     def measure_current(self, channel: Union[int, list[int]]) -> float:
@@ -124,7 +124,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         """
         return float(
             self.transmission.poll(
-                ASCII(self.query_by_channel("MEAS:CURR", channel))
+                ASCII(self.generate_query("MEAS:CURR", channels=channel))
             ).data
         )
 
@@ -139,7 +139,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             bool: The output status of the channel.
         """
         return bool(
-            self.transmission.poll(ASCII(self.query_by_channel("OUTP", channel))).data
+            self.transmission.poll(ASCII(self.generate_query("OUTP", channels=channel))).data
         )
 
     def set_output(self, state: bool, channel: Union[int, list[int]]) -> None:
@@ -151,5 +151,5 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         """
         value = 1 if state else 0
         self.transmission.command(
-            ASCII(self.command_by_channel("OUTP", value, channel))
+            ASCII(self.generate_command("OUTP", arguments=value, channels=channel))
         )

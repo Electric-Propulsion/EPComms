@@ -48,7 +48,7 @@ class KeysightEDU34450A(Multimeter):
         """
         self.transmission.command(ASCII("SYST:BEEP"))
 
-    def measure_voltage_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF', channel: str = 'PRIMARY') -> float:
+    def measure_voltage_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
         """Measures AC voltage using a specified measurement range, on a specified channel.
 
         Args:
@@ -70,21 +70,17 @@ class KeysightEDU34450A(Multimeter):
         except AssertionError:
             raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
 
-        try:
-            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
-        except AssertionError:
-            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
+        
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:AC? {range_str},{resolution}")).data)
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:VOLTAGE:AC? {range_str},{resolution}")).data)
     
-    def measure_voltage_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF', channel: str = 'PRIMARY') -> float:
+    def measure_voltage_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
         """Measures DC voltage using a specified measurement range, on a specified channel.
 
         Args:
             measurement_range (Union[str | int | float], optional): Specify a numeric value (in Volts), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
             resolution (str, optional): Specify one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
-            channel (str, optional): Only 'PRIMARY' channel works. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured voltage value.
@@ -99,13 +95,9 @@ class KeysightEDU34450A(Multimeter):
         except AssertionError:
             raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
 
-        try:
-            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
-        except AssertionError:
-            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:VOLTAGE:DC? {range_str},{resolution}")).data)
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:VOLTAGE:DC? {range_str},{resolution}")).data)
     
     def measure_capacitance(self, measurement_range: Union[str|int] = 'AUTO', resolution: str = 'DEF') -> float:
         """Measures capacitance using a specified measurement range, on the 'PRIMARY' channel.
@@ -147,13 +139,12 @@ class KeysightEDU34450A(Multimeter):
         """
         return True if self.measure_continuity_raw() <= 10.0 else False
     
-    def measure_current_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF', channel: str = 'PRIMARY') -> float:
+    def measure_current_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
         """Measures AC current using a specified measurement range, on a specified channel.
 
         Args:
             measurement_range (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
             resolution (str, optional): Specify one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
-            channel (str, optional): Only 'PRIMARY' channel works. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured current value.
@@ -167,22 +158,16 @@ class KeysightEDU34450A(Multimeter):
             assert resolution.upper() in {'DEF','MAX','MIN'} 
         except AssertionError:
             raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
-
-        try:
-            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
-        except AssertionError:
-            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:AC? {range_str},{resolution}")).data)
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CURRENT:AC? {range_str},{resolution}")).data)
     
-    def measure_current_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF', channel: str = 'PRIMARY') -> float:
+    def measure_current_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
         """Measures DC current using a specified measurement range, on a specified channel.
 
         Args:
             measurement_range (Union[str | int | float], optional): Specify a numeric value (in Amps), or one of {AUTO|DEF|MAX|MIN}. Defaults to 'AUTO'.
             resolution (str, optional): Specify one of {DEF|MAX|MIN}. If using autoranging (measurement_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
-            channel (str, optional): Only 'PRIMARY' channel works. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured current value.
@@ -196,14 +181,9 @@ class KeysightEDU34450A(Multimeter):
             assert resolution.upper() in {'DEF','MAX','MIN'} 
         except AssertionError:
             raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
-
-        try:
-            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
-        except AssertionError:
-            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
         
         range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:CURRENT:DC? {range_str},{resolution}")).data)
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CURRENT:DC? {range_str},{resolution}")).data)
     
     def measure_diode(self) -> float:
         """Performs a diode test.
@@ -213,7 +193,7 @@ class KeysightEDU34450A(Multimeter):
         """
         return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:DIODE?")).data)
     
-    def measure_frequency(self, freq_range: Union[str|int|float] = 'DEF', freq_resolution: str = 'DEF', volt_range: Union[str|int|float] = 0.1, channel: str = 'PRIMARY') -> float:
+    def measure_frequency(self, freq_range: Union[str|int|float] = 'DEF', freq_resolution: str = 'DEF', volt_range: Union[str|int|float] = 0.1) -> float:
         """Measures frequency of an AC volage signal at a desired resolution using a specified frequency range, on a specified channel.
 
         Before frequency measurement, the AC voltage range is configured. As per the programmer guide, the voltage range should be "at least" 0.1V for accurate frequency measurements.
@@ -222,7 +202,6 @@ class KeysightEDU34450A(Multimeter):
             freq_range (Union[str | int | float], optional): Specify a numeric value (in Hz), or one of {DEF|MAX|MIN}. MIN = DEF = 1 Hz, MAX = 1 MHz. Defaults to 'DEF'.
             freq_resolution (str, optional): Specify one of {DEF|MAX|MIN}. If using autoranging (freq_range == 'AUTO'), resolution must be set to 'DEF'. Defaults to 'DEF'.
             volt_range (Union[str | int | float], optional): Specify a numeric value (in V), or one of {AUTO|DEF|MAX|MIN}. Defaults to 0.1 V.
-            channel (str, optional): Only 'PRIMARY' channel works. Defaults to 'PRIMARY'.
 
         Returns:
             float: The measured current value.
@@ -242,14 +221,9 @@ class KeysightEDU34450A(Multimeter):
         except AssertionError:
             raise ValueError(f"Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
 
-        try:
-            assert channel.upper() in {'PRIMARY', 'SECONDARY'}
-        except AssertionError:
-            raise ValueError(f"Invalid channel name. Channel must be 'PRIMARY' or 'SECONDARY'.")
-
         range_str = freq_range if isinstance(freq_range, str) else f"{freq_range:.2e}"
-        self.transmission.command(f"SENSE:{channel}:FREQUENCY:VOLTAGE:RANGE {volt_range}")
-        return float(self.transmission.poll(ASCII(f"MEASURE:{channel}:FREQUENCY? {range_str},{freq_resolution}")).data)
+        self.transmission.command(f"SENSE:PRIMARY:FREQUENCY:VOLTAGE:RANGE {volt_range}")
+        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:FREQUENCY? {range_str},{freq_resolution}")).data)
     
     def read_errors(self):
         i = 0
