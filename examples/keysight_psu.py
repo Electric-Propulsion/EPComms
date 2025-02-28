@@ -1,8 +1,11 @@
 from epcomms.equipment.powersupply import KeysightEDU36311A
 import time
 
+from epcomms.connection.transmission.visa import Visa
 
-psu = KeysightEDU36311A("TCPIP::192.168.0.145::INSTR")
+print(Visa.list_resources())
+
+psu = KeysightEDU36311A("TCPIP0::192.168.0.145::inst0::INSTR")
 try:
     psu.beep()
 
