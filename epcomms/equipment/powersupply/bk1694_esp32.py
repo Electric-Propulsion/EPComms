@@ -4,7 +4,7 @@ This module provides an interface to control the BK1694 power supply by sending 
 See https://github.com/Electric-Propulsion/BK1694_Controller.
 """
 
-from epcomms.connection.transmission.sockets import Socket
+from epcomms.connection.transmission import Socket
 from . import PowerSupply
 
 

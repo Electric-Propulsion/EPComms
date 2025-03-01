@@ -60,8 +60,9 @@ class Visa(Transmission):
         for i in range(num_attempts):
             try:
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
-                self.class_lock.acquire()
-                self.device = self.resource_manager.open_resource(resource_name)
+                time.sleep(0.1)
+                with self.class_lock:
+                    self.device = self.resource_manager.open_resource(resource_name)
             except pyvisa.errors.VisaIOError as e:
                 if i == num_attempts - 1:
                     raise (e)
