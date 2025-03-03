@@ -122,7 +122,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         Returns:
             float: The measured current in amperes.
         """
-        return float(
+        return self.parse_response(float,
             self.transmission.poll(
                 ASCII(self.generate_query("MEAS:CURR", channels=channel))
             ).data
