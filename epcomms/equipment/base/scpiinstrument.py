@@ -52,3 +52,10 @@ class SCPIInstrument:
 
 
         return f"{query_keyword}?{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channels})" if channels else ''}"
+
+    def parse_response(self, conversion_function: callable, response: str):
+        value_list = response.strip('\n').split(",")
+        if len(value_list) == 1:
+            return conversion_function(value_list[0])
+        else:
+            return [conversion_function(value) for value in value_list]

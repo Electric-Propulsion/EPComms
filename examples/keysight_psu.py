@@ -9,6 +9,8 @@ psu = KeysightEDU36311A("TCPIP0::192.168.0.145::inst0::INSTR")
 try:
     psu.beep()
 
+    print(psu.measure_voltage([1,2,3]))
+
     for channel in range(1, 4):
         psu.set_output(False, channel)
 
