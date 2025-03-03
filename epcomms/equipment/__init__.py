@@ -5,3 +5,4 @@ from . import vacuumcontroller
 from . import multimeter
 from . import powersupply
 from . import daq
+from . import test
