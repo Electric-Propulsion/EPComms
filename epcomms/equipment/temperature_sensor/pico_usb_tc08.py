@@ -17,6 +17,9 @@ class PicoUSBTC08(TemperatureSensor):
         self.transmission = Socket(self.ws_url)
 
     def open_instrument(self) -> None:
+        """
+        Starts the Pico Datalogger and automatically configures all 8 channels to be of 'K' type.
+        """
         data = {"command": "open_instrument"}
         self.transmission.command(data)
     
@@ -29,6 +32,9 @@ class PicoUSBTC08(TemperatureSensor):
         self.transmission.command(data)
     
     def disable_channel(self, channel: int) -> None:
+        """
+        DO NOT DISABLE CHANNELS, EPComms will crash.
+        """
         data = {"command": "disable_channel", "channel": channel}
         self.transmission.command(data)
     
