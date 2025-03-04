@@ -131,7 +131,7 @@ class KeysightEDU36311A(PowerSupply):
         Returns:
             float: The measured current in amperes.
         """
-        return float(self.transmission.poll(ASCII(f"MEAS:CURR? (@{channel})")).data)        )
+        return float(self.transmission.poll(ASCII(f"MEAS:CURR? (@{channel})")).data)        
     
 
     def get_output(self, channel: int = 0) -> None:
