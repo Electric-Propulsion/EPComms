@@ -18,8 +18,15 @@ class Socket(Transmission):
         self.ws_url = ws_url
         self._loop = asyncio.new_event_loop()
 
+    async def _async_send(self, data:dict) -> None:
+        async with websockets.connect(self.ws_url) as websocket:
+            await websocket.send(json.dumps(data))
+
     def _command(self, data: dict) -> None:
-        raise NotImplementedError
+        try:
+            asyncio.run(self._async_send(data))
+        except Exception as e:
+            raise TransmissionError(e) from e
 
     def _read(self) -> dict:
         raise NotImplementedError
