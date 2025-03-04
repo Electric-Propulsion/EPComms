@@ -3,7 +3,7 @@ Pico USB-TC-08 Thermocouple DAQ control.
 This module provides an interface to control the Pico USB-TC-08.
 """
 
-from epcomms.connection.transmission.sockets import Socket
+from epcomms.connection.transmission import Socket
 from . import TemperatureSensor
 
 import json
@@ -15,6 +15,8 @@ class PicoUSBTC08(TemperatureSensor):
         self.port = port
         self.ws_url = f"ws://{self.ip}:{str(self.port)}"
         self.transmission = Socket(self.ws_url)
+
+        self.open_instrument()
 
     def open_instrument(self) -> None:
         """
@@ -41,7 +43,7 @@ class PicoUSBTC08(TemperatureSensor):
     def measure_temperature(self, channel: int) -> float:
         raise NotImplementedError("The Pico USB TC-08 does not support measuring temperature from one channel at a time.")
     
-    def measure_all_channels(self) -> dict:
+    def measure_all_channels(self) -> list:
         data = {"command": "measure_all_channels"}
         resp = self.transmission.poll(data)
         # For some reason websockets sends JSON strings with single quotes (bad).
