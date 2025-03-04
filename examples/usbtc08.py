@@ -6,14 +6,10 @@ def test1():
 
     pico.open_instrument()
 
-    for i in range(0,8):
-        pico.configure_channel(i+1, 'K')
-
     result = pico.measure_all_channels()
     print(result)
-
-    pico.disable_channel(8)
     result = pico.measure_all_channels()
+    print(result)
 
     pico.close_instrument()
     
