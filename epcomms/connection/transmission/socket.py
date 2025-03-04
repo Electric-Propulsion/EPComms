@@ -22,14 +22,11 @@ class Socket(Transmission):
         async with websockets.connect(self.ws_url) as websocket:
             await websocket.send(json.dumps(data))
 
-    def command(self, data: dict) -> None:
+    def _command(self, data: dict) -> None:
         try:
             asyncio.run(self._async_send(data))
         except Exception as e:
             raise TransmissionError(e) from e
-
-    def _command(self, data: dict) -> None:
-        raise NotImplementedError
 
     def _read(self) -> dict:
         raise NotImplementedError
