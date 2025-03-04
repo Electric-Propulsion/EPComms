@@ -4,8 +4,9 @@ This module provides an interface to control the Pico USB-TC-08.
 """
 
 from epcomms.connection.transmission.sockets import Socket
-
 from . import TemperatureSensor
+
+import json
 
 class PicoUSBTC08(TemperatureSensor):
 
@@ -23,20 +24,12 @@ class PicoUSBTC08(TemperatureSensor):
         data = {"command": "close_instrument"}
         self.transmission.command(data)
 
-    def enable_sampling(self, sampling_interval: int) -> None:
-        data = {"command": "enable_sampling", "sampling_interval": sampling_interval}
-        self.transmission.command(data)
-    
-    def disable_sampling(self) -> None:
-        data = {"command": "disable_sampling"}
-        self.transmission.command(data)
-
     def configure_channel(self, channel: int, type: str) -> None:
         data = {"command": "configure_channel", "channel": channel, "type": type}
         self.transmission.command(data)
     
     def disable_channel(self, channel: int) -> None:
-        data = {"command": "disable_channel", "channel": int}
+        data = {"command": "disable_channel", "channel": channel}
         self.transmission.command(data)
     
     def measure_temperature(self, channel: int) -> float:
@@ -44,4 +37,8 @@ class PicoUSBTC08(TemperatureSensor):
     
     def measure_all_channels(self) -> dict:
         data = {"command": "measure_all_channels"}
-        return self.transmission.poll(data)
+        resp = self.transmission.poll(data)
+        # For some reason websockets sends JSON strings with single quotes (bad).
+        resp_unp = json.loads(str(resp).replace("'", '"'))
+        # Return all real channels (not cold junction), hence index 0 excluded.
+        return resp_unp['temps'][1:]

@@ -18,14 +18,6 @@ class TemperatureSensor(Instrument):
         raise NotImplementedError
 
     @abstractmethod
-    def enable_sampling(self, sampling_interval: int) -> None:
-        raise NotImplementedError
-    
-    @abstractmethod
-    def disable_sampling(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
     def configure_channel(self, channel: int, type: str) -> None:
         raise NotImplementedError
     
