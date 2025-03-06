@@ -6,3 +6,5 @@ from . import multimeter
 from . import powersupply
 from . import daq
 from . import test
+from . import temperature_sensor
+from . import relay

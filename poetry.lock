@@ -97,6 +97,26 @@ files = [
 ]
 
 [[package]]
+name = "phidget22"
+version = "1.22.20250106"
+description = "Phidget22 Python wrapper library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "phidget22-1.22.20250106-py3-none-any.whl", hash = "sha256:5add42e690c9c4070f7676fa54bf024f82de07e88b2585fcc310cc117cfaae0e"},
+    {file = "phidget22-1.22.20250106-py3-none-macosx_10_11_universal2.whl", hash = "sha256:42886f258b30118441a1ade9653a8d547304348d6fdbe2a361c00c5d70f66bf8"},
+    {file = "phidget22-1.22.20250106-py3-none-macosx_10_11_x86_64.whl", hash = "sha256:02ec58cd2bf812c7baa0230c1cccc42846de866e7a8b16c19f15e9bfe4c2e91b"},
+    {file = "phidget22-1.22.20250106-py3-none-macosx_11_0_arm64.whl", hash = "sha256:967d2e8d23ce8349c07c410ace02b29e3c1c4c2ad9cd633e0ad713e989153683"},
+    {file = "phidget22-1.22.20250106-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:8d4502400d5ddb45d31ddff77072d4ca6494a04aeb2a95a4b37585f89bbdea8e"},
+    {file = "phidget22-1.22.20250106-py3-none-manylinux_2_28_armv7l.whl", hash = "sha256:d8b9a2eda7e2b37f41d1bea4929611cc5006bb4fed56f1b7e450dad1b8009197"},
+    {file = "phidget22-1.22.20250106-py3-none-manylinux_2_28_i686.whl", hash = "sha256:975a754ab3fb2688e7716b55d5d2eb61eb1b55baba8e0258392a07a0d912ca74"},
+    {file = "phidget22-1.22.20250106-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:441873446dbb264455fd25485926b62d471b3b39636d4f87e22ef619c7d23ad6"},
+    {file = "phidget22-1.22.20250106-py3-none-win32.whl", hash = "sha256:e103a73505561295511be12d05d5aabc8ebc4541b504f216e4a296e04d7656b0"},
+    {file = "phidget22-1.22.20250106-py3-none-win_amd64.whl", hash = "sha256:b8417a82612ccfff925decf4ccd1b5b1a68014bcc5baa838d4dc0294563753e9"},
+    {file = "phidget22-1.22.20250106.tar.gz", hash = "sha256:5fc7c3c60c162d57725c34d42dca9e72b47d52ab13c5e1ec495284785470e827"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "4.3.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
@@ -448,4 +468,4 @@ ifaddr = ">=0.1.7"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "56a0d2d3d967cca7d0a712465ec2a79bc71af7f730eb4326a600f8dc5a2c0701"
+content-hash = "5d0684542b47f55181a0a63478690dae8967446c42e7b7566fcd4958665e2474"
