@@ -23,7 +23,7 @@ class Fluke45(Multimeter):
         # pylint: disable=unused-argument
         raise NotImplementedError
     
-    def measure_voltage_dc(self, measurement_range, resolution) -> float:
+    def measure_voltage_dc(self, measurement_range = None, resolution = None) -> float:
         # pylint: disable=unused-argument
         self.transmission.poll(ASCII("VDC\r"))
         time.sleep(0.1)
