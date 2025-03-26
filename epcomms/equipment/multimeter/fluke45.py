@@ -25,7 +25,7 @@ class Fluke45(Multimeter):
         # if it's unhappy
 
         status = self.transmission.read().data
-        if len(status) != 2 or status[1] != ">":
+        if len(status) != 3 or status[1:-1] != ">":
             raise TransmissionError("Fluke 45 Invalid status string")
         if status[0] == "?":
             raise TransmissionError("Fluke 45 Command Error")
@@ -68,11 +68,13 @@ class Fluke45(Multimeter):
     
     def measure_voltage_dc(self, measurement_range = None, resolution = None) -> float:
         # pylint: disable=unused-argument
-        self.transmission.poll(ASCII("VDC\r"))
-        time.sleep(0.1)
+        self.transmission.command(ASCII("VDC\r"))
+        self.read_fluke_status()
+        self.set_range(measurement_range)
+        self.set_resolution(resolution)
+
         data = self.transmission.poll(ASCII("VAL1?\r")).data
-        time.sleep(0.1)
-        self.transmission.read()
+        self.read_fluke_status()
         return float(data)
     
     
@@ -83,16 +85,16 @@ class Fluke45(Multimeter):
     def measure_continuity_raw(self) -> bool:
         self.transmission.command(ASCII("CONT\r"))
         self.read_fluke_status()
-        self.transmission.poll(ASCII("VAL1?\r"))
+        data = self.transmission.poll(ASCII("VAL1?\r")).data
         self.read_fluke_status()
-        return float(self.transmission.read().data)
+        return float(data)
     
     def measure_continuity(self) -> bool:
         return self.measure_continuity_raw() < 0.025
     
     def measure_current_ac(self, measurement_range = None, resolution = None) -> float:
         # pylint: disable=unused-argument
-        self.transmission.command(ASCII("AAC"))
+        self.transmission.command(ASCII("AAC\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)
         self.set_resolution(resolution)
@@ -103,22 +105,22 @@ class Fluke45(Multimeter):
 
     def measure_current_dc(self, measurement_range = None, resolution = None) -> float:
         # cause this is quick and dirty, ignoring the arguments
-        self.transmission.command(ASCII("ADC"))
+        self.transmission.command(ASCII("ADC\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)
         self.set_resolution(resolution)
-        data = self.transmission.poll(ASCII("VAL1?")).data
+        data = self.transmission.poll(ASCII("VAL1?\r")).data
         self.read_fluke_status()
         return float(data)
     
     def measure_frequency(self, freq_range = None, freq_resolution = None, volt_range = None) -> float:
         if volt_range is not None:
             raise ValueError("The Fluke 45 does not support setting the voltage range for frequency measurements")
-        self.transmission.command(ASCII("FREQ"))
+        self.transmission.command(ASCII("FREQ\r"))
         self.read_fluke_status()
         self.set_range(freq_range)
         self.set_resolution(freq_resolution)
-        data = self.transmission.poll(ASCII("VAL1?")).data
+        data = self.transmission.poll(ASCII("VAL1?\r")).data
         self.read_fluke_status()
         return float(data)
 

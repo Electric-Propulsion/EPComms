@@ -1,9 +1,10 @@
 from epcomms.equipment.multimeter.fluke45 import Fluke45
 import time
 
-mm = Fluke45("COM4")
+mm = Fluke45("/dev/ttyUSB0")
 
 print(mm.measure_continuity())
+time.sleep(1)
 
 
 for _range in [None, 'AUTO', 1, 2, 3, 4, 5, 6, 7]:
@@ -37,5 +38,8 @@ for _range in [None, 'AUTO', 1, 2, 3, 4, 5, 6, 7]:
         except Exception as e:
             print(f"Error measuring frequency with range {_range} and resolution {resolution}: {e}")
         time.sleep(1)
+
+
+print("DONE")
 
 
