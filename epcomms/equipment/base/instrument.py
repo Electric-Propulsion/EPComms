@@ -3,11 +3,15 @@ This module defines the Instrument class, which serves as an abstract base class
 for all instruments that can sense the physical environment.
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from typing import Any
+
 from epcomms.connection.transmission import Transmission
+
 
 class MeasurementError(Exception):
     pass
+
 
 class CommandError(Exception):
     pass
@@ -22,12 +26,10 @@ class Instrument(ABC):
     can sense the physical environment.
     """
 
-    transmission: Transmission
+    transmission: Transmission[Any, Any]
 
-    def __init__(self, transmission: Transmission):
+    def __init__(self, transmission: Transmission[Any, Any]) -> None:
         self.transmission = transmission
 
     def close(self) -> None:
         self.transmission.close()
-
-    

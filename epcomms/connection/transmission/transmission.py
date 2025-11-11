@@ -3,9 +3,9 @@ This module defines the Transmission abstract base class and the TransmissionErr
 Classes:
     TransmissionError: Custom exception for transmission-related errors.
     Transmission: Abstract base class for handling packet transmission.
-The Transmission class requires a packet_class argument during initialization, 
+The Transmission class requires a packet_class argument during initialization,
 which must be a subclass of Packet.
-It provides abstract methods for sending and receiving packets, and a default 
+It provides abstract methods for sending and receiving packets, and a default
 implementation for polling data.
 Methods:
     __init__(self, packet_class: type) -> None:
@@ -19,55 +19,49 @@ Methods:
 """
 
 from abc import ABC, abstractmethod
-from epcomms.connection.packet import Packet
-import time
 from threading import Lock
+from typing import Any, Generic, TypeVar
+
+from epcomms.connection.packet import ReceivedPacket, TransmittedPacket
+
+T_RX = TypeVar("T_RX", bound=ReceivedPacket[Any, Any])
+T_TX = TypeVar("T_TX", bound=TransmittedPacket[Any, Any])
 
 
 class TransmissionError(Exception):
     """Custom exception for transmission-related errors."""
 
 
-class Transmission(ABC):
+class Transmission(ABC, Generic[T_RX, T_TX]):
     """Abstract base class for handling packet transmission."""
 
-    packet_class: type
-
-    def __init__(self, packet_class: type) -> None:
-        # TODO: Is there a way to type hint this? # pylint: disable=fixme
-        # TODO: We should check if the packet is concrete # pylint: disable=fixme
-        # TODO: Is there a way to check this without instantiating the object? # pylint: disable=fixme #(I'm working on it!)
-        if not issubclass(packet_class, (Packet, dict)):
-            raise TypeError("packet_class must be of type Packet")
-
-        self.packet_class = packet_class
+    def __init__(self) -> None:
         self._lock = Lock()
 
     @abstractmethod
-    def _command(self, data: Packet) -> None:
+    def _command(self, packet: T_TX) -> None:
         """Send a packet of data to the connected device, i.e. 'transmit' data."""
         raise NotImplementedError("This is an abstract method!")
 
     @abstractmethod
-    def _read(self) -> Packet:
+    def _read(self) -> T_RX:
         """Recieve a packet of data from the connected device."""
         raise NotImplementedError("This is an abstract method!")
 
-    def command(self, data: Packet) -> None:
+    def command(self, packet: T_TX) -> None:
         with self._lock:
-            self._command(data)
-    
-    def read(self) -> Packet:
+            self._command(packet)
+
+    def read(self) -> T_RX:
         with self._lock:
             return self._read()
 
-
-    def poll(self, data: Packet) -> Packet:
+    def poll(self, packet: T_TX) -> T_RX:
         """Default implementation of 'polling' for data, should be overridden
         if a transmission method has a more efficient way to poll."""
 
         with self._lock:
-            self._command(data)
+            self._command(packet)
             return self._read()
 
     def close(self) -> None:

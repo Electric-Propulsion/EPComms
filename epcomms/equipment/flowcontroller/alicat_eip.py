@@ -1,12 +1,13 @@
 """AlicatEIP class for communication with Alicat EIP flow control devices over EthernetIP"""
 
 from typing import Union
-from epcomms.connection.packet import CIPTX
 
 # pylint: disable=no-name-in-module
 # It's just some fuckery but it exists
-from epcomms.connection.packet import UINT, REAL, STRING, UDINT, WORD
+from epcomms.connection.packet import CIPTX
+from epcomms.connection.packet.cip_datatypes import REAL, STRING, UDINT, UINT, WORD
 from epcomms.connection.transmission import EthernetIP, TransmissionError
+
 from . import FlowController
 
 
@@ -14,16 +15,16 @@ class AlicatEIP(FlowController):
     """AlicatEIP class for communication with Alicat devices over EthernetIP."""
 
     # loop up table for identity elements
-    _identity_lut = {
-        "vendor_id": [1, UINT],
-        "device_type": [2, UINT],
-        "product_code": [3, UINT],
-        "status": [5, WORD],
-        "serial_number": [6, UDINT],
-        "product_name": [7, STRING],
+    _identity_lut: dict[str, tuple[int, type]] = {
+        "vendor_id": (1, UINT),
+        "device_type": (2, UINT),
+        "product_code": (3, UINT),
+        "status": (5, WORD),
+        "serial_number": (6, UDINT),
+        "product_name": (7, STRING),
     }
 
-    def __init__(self, routing_path):
+    def __init__(self, routing_path: str):
         transmission = EthernetIP(routing_path)
         super().__init__(transmission)
 
