@@ -28,12 +28,15 @@ Classes:
                     CIPRX: The data received from the device.
 """
 
-from pycomm3 import CIPDriver, Services
+from pycomm3 import CIPDriver
+from pycomm3.tag import Tag
+
 from epcomms.connection.packet import CIPRX, CIPTX
-from . import Transmission, TransmissionError
+
+from .transmission import Transmission, TransmissionError
 
 
-class EthernetIP(Transmission):
+class EthernetIP(Transmission[CIPRX, CIPTX]):
     """class for communication with EtherNet/IP devices
     Fun fact: The 'IP' in EtherNet/IP stands for 'Industrial Protocol' and not 'Internet Protocol'
     """
@@ -41,15 +44,15 @@ class EthernetIP(Transmission):
     # The driver object for the pycomm3 library
     driver: CIPDriver
 
-    def __init__(self, device_path):
+    def __init__(self, device_path: str):
         """Initializes the EthernetIP object
         Args:
             device_path (str): The path to the device, e.g. '192.168.0.172'
         """
         self.driver = CIPDriver(device_path)
-        super().__init__(CIPRX)
+        super().__init__()
 
-    def _command(self, data: CIPTX):
+    def _command(self, packet: CIPTX):
         """Send a command to the device
 
         Args:
@@ -57,27 +60,29 @@ class EthernetIP(Transmission):
         """
         if not self.driver.connected:
             self.driver.open()
-
-        print(data.data)
-
-        repsonse_tag = self.driver.generic_message(
-            service=Services.set_attribute_single,
-            class_code=data.class_code,
-            instance=data.instance,
-            attribute=data.attribute,
-            request_data=data.parameters,
+        serialized_packet = packet.serialize()
+        print(serialized_packet)
+        repsonse_tag: Tag = (
+            self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
+                service=serialized_packet["service"],
+                class_code=serialized_packet["class_code"],
+                instance=serialized_packet["instance"],
+                attribute=serialized_packet["attribute"],
+                request_data=serialized_packet["request_data"],
+                data_type=serialized_packet["data_type"],
+            )
         )
 
         if not repsonse_tag:
             print(repsonse_tag)
             raise TransmissionError()
 
-    def _read(self):
+    def _read(self) -> CIPRX:
         raise NotImplementedError(
             "EthernetIP does not support read operations. You must poll for data."
         )
 
-    def poll(self, data: CIPTX) -> CIPRX:
+    def poll(self, packet: CIPTX) -> CIPRX:
         """Poll the device for data
 
         Args:
@@ -89,15 +94,20 @@ class EthernetIP(Transmission):
         if not self.driver.connected:
             self.driver.open()
 
-        response_tag = self.driver.generic_message(
-            service=Services.get_attribute_single,
-            class_code=data.class_code,
-            instance=data.instance,
-            attribute=data.attribute,
-            data_type=data.data_type,
+        serialized_packet = packet.serialize()
+        print(serialized_packet)
+        response_tag = (
+            self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
+                service=serialized_packet["service"],
+                class_code=serialized_packet["class_code"],
+                instance=serialized_packet["instance"],
+                attribute=serialized_packet["attribute"],
+                data_type=serialized_packet["data_type"],
+            )
         )
+        
 
         if not response_tag:
             raise TransmissionError()
 
-        return self.packet_class(response_tag)
+        return CIPRX.from_wire(response_tag)

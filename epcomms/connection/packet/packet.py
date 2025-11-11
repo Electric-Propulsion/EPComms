@@ -1,26 +1,20 @@
-"""Abstract base class for packets."""
+from typing import Protocol, TypeVar
 
-from abc import ABC, abstractmethod
-from typing import Union
+Data = TypeVar("Data", infer_variance=True)
+Wire = TypeVar("Wire", infer_variance=True)
 
 
-class Packet(ABC):
-    """Abstract base class for packets. The represent data that's being
-    transmitted, but may not map exactly to the bits on the line."""
+class TransmittedPacket(
+    Protocol[Data, Wire],
+):
+    def serialize(self) -> Wire: ...
 
-    _data: Union[str, int, float] = None
+    @classmethod
+    def from_data(cls, data: Data) -> "TransmittedPacket[Data, Wire]": ...
 
-    @abstractmethod
-    def serialize_bytes(self) -> bytes:
-        """Serialize the packet into bytes for transmission."""
-        raise NotImplementedError("Calling abstract method!")
 
-    @abstractmethod
-    def serialize_str(self) -> str:
-        """Serialize the packet into a string for transmission."""
-        raise NotImplementedError("Calling abstract method!")
+class ReceivedPacket(Protocol[Data, Wire]):
+    @classmethod
+    def from_wire(cls, wire: Wire) -> "ReceivedPacket[Data, Wire]": ...
 
-    @property
-    def data(self) -> Union[str, int, float]:
-        """Serialize the packet into a string for transmission."""
-        return self._data
+    def deserialize(self) -> Data: ...

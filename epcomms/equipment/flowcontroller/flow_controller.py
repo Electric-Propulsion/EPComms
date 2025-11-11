@@ -6,10 +6,10 @@ subclasses to interact with flow controllers.
 """
 
 from abc import abstractmethod
-from epcomms.equipment.base import Instrument
+from epcomms.equipment.base import Instrument, TransmissionType
 
 
-class FlowController(Instrument):
+class FlowController(Instrument[TransmissionType]):
     """
     FlowController is an abstract base class that represents a flow controller instrument.
     It inherits from the Instrument class and defines the following abstract methods:

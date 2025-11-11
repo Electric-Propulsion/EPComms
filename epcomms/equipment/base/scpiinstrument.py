@@ -1,11 +1,14 @@
-from typing import Union
+from typing import Callable, Union
 
 
 class SCPIInstrument:
     # Yar, it be a mixin!
 
     def generate_command(
-        self, command_keyword: str, arguments: Union[str, list[str], None] = None, channels: Union[int, list[int], None] = None
+        self,
+        command_keyword: str,
+        arguments: Union[str, list[str], None] = None,
+        channels: Union[int, list[int], None] = None,
     ) -> str:
         """
         Generates a SCPI command string.
@@ -18,19 +21,19 @@ class SCPIInstrument:
         Returns:
             str: The SCPI command string.
         """
-        if isinstance(channels, list):
-            channels = list(filter(None, channels))
-            channels = ",".join([str(ch) for ch in channels])
+
+        channel_str = self._channel_string(channels) if channels else None
 
         if isinstance(arguments, list):
-            arguments = list(filter(None, arguments))
-            arguments = ",".join(arguments)
+            arguments = ",".join(list(filter(None, arguments)))
 
-
-        return f"{command_keyword}{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channels})" if channels else ''}"
+        return f"{command_keyword}{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channel_str})" if channels else ''}"
 
     def generate_query(
-        self, query_keyword: str, arguments: Union[str, list[str], None] = None, channels: Union[int, list[int], None] = None
+        self,
+        query_keyword: str,
+        arguments: Union[str, list[str], None] = None,
+        channels: Union[int, list[int], None] = None,
     ) -> str:
         """
         Generates a SCPI query string.
@@ -42,20 +45,25 @@ class SCPIInstrument:
         Returns:
             str: The SCPI query string.
         """
-        if isinstance(channels, list):
-            channels = list(filter(None, channels))
-            channels = ",".join([str(ch) for ch in channels])
+        channel_str = self._channel_string(channels) if channels else None
 
         if isinstance(arguments, list):
             arguments = list(filter(None, arguments))
             arguments = ",".join(arguments)
 
+        return f"{query_keyword}?{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channel_str})" if channels else ''}"
 
-        return f"{query_keyword}?{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channels})" if channels else ''}"
-
-    def parse_response(self, conversion_function: callable, response: str):
-        value_list = response.strip('\n').split(",")
+    def parse_response(self, conversion_function: Callable[[str], str], response: str):
+        value_list = response.strip("\n").split(",")
         if len(value_list) == 1:
             return conversion_function(value_list[0])
         else:
             return [conversion_function(value) for value in value_list]
+
+    @classmethod
+    def _channel_string(cls, channels: Union[int, list[int], str]) -> str:
+        return (
+            ",".join([str(ch) for ch in list(filter(None, channels))])
+            if isinstance(channels, str)
+            else str(channels)
+        )

@@ -1,16 +1,20 @@
 """
-This module provides the Visa class for handling VISA 
+This module provides the Visa class for handling VISA
 (Virtual Instrument Software Architecture) communication.
 """
 
-import pyvisa
-from epcomms.connection.packet import Packet, ASCII
-from . import Transmission
-from threading import Lock
 import time
+from threading import Lock
+from typing import ClassVar
+
+import pyvisa
+
+from epcomms.connection.packet import String
+
+from .transmission import Transmission
 
 
-class Visa(Transmission):
+class Visa(Transmission[String, String]):
     """
     Visa class for handling communication with VISA-compatible devices using the pyvisa library.
     Attributes:
@@ -26,11 +30,12 @@ class Visa(Transmission):
             Reads data from the connected device and returns it as a Packet object.
     """
 
-    class_lock: Lock = Lock()
-    resource_manager = pyvisa.ResourceManager('@py')
+    class_lock: ClassVar[Lock] = Lock()
+    resource_manager = pyvisa.ResourceManager("@py")
+    device: pyvisa.resources.MessageBasedResource
 
     @classmethod
-    def list_resources(cls) -> list:
+    def list_resources(cls) -> tuple[str, ...]:
         """
         List available VISA resources.
 
@@ -42,7 +47,7 @@ class Visa(Transmission):
         """
         # return pyvisa.ResourceManager().list_resources()
         cls.class_lock.acquire()
-        resources = cls.resource_manager.list_resources('?*')
+        resources = cls.resource_manager.list_resources("?*")
         cls.class_lock.release()
         return resources
 
@@ -62,7 +67,13 @@ class Visa(Transmission):
                 # self.device = pyvisa.ResourceManager().open_resource(resource_name)
                 time.sleep(0.1)
                 with self.class_lock:
-                    self.device = self.resource_manager.open_resource(resource_name)
+                    device = self.resource_manager.open_resource(
+                        resource_name,
+                    )
+                    if not isinstance(device, pyvisa.resources.MessageBasedResource):
+                        raise TypeError(
+                            "The opened resource is not a MessageBasedResource."
+                        )
             except pyvisa.errors.VisaIOError as e:
                 if i == num_attempts - 1:
                     raise (e)
@@ -70,9 +81,9 @@ class Visa(Transmission):
                     continue
             break
         self.device.timeout = 2500
-        super().__init__(ASCII)
+        super().__init__()
 
-    def _command(self, data: ASCII) -> None:
+    def _command(self, packet: String) -> None:
         """
         Sends a command to the device.
 
@@ -83,13 +94,12 @@ class Visa(Transmission):
         Raises:
         AssertionError: If the provided data is not an instance of the ASCII class.
         """
-        assert isinstance(data, ASCII)
         try:
-            self.device.write(data.serialize_str())
+            self.device.write(packet.serialize())
         except Exception as e:
             raise e
 
-    def _read(self) -> Packet:
+    def _read(self) -> String:
         """
         Reads data from the device and returns it as a Packet object.
 
@@ -97,16 +107,16 @@ class Visa(Transmission):
             Packet: The data read from the device, encapsulated in a Packet object.
         """
         try:
-            packet = self.packet_class(self.device.read())
+            packet = String.from_wire(self.device.read())
         except Exception as e:
             raise e
 
         return packet
 
-    def poll(self, data: ASCII) -> Packet:
+    def poll(self, packet: String) -> String:
         with self._lock:
             try:
-                return self.packet_class(self.device.query(data.serialize_str()))
+                return String.from_wire(self.device.query(packet.serialize()))
             except Exception as e:
                 raise e
 
