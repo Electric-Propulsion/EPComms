@@ -270,7 +270,7 @@ class AlicatEIP(FlowController[EthernetIP]):
         
         data = self.transmission.poll(check_packet).deserialize()
         if not isinstance(data, bytes) or isinstance(data, str):
-            # str is a subclass of bytes(?), so check that first
+            # str is a subclass of bytes(?), so check that explicitly.
             raise TransmissionError("Device readings response is not bytes.")
         print("Expected:")
         print(UINT.decode(data[0:2]), command_id)

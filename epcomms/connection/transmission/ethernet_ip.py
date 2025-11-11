@@ -61,6 +61,7 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
         if not self.driver.connected:
             self.driver.open()
         serialized_packet = packet.serialize()
+        print(serialized_packet)
         repsonse_tag: Tag = (
             self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
                 service=serialized_packet["service"],
@@ -94,6 +95,7 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
             self.driver.open()
 
         serialized_packet = packet.serialize()
+        print(serialized_packet)
         response_tag = (
             self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
                 service=serialized_packet["service"],
@@ -103,6 +105,7 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
                 data_type=serialized_packet["data_type"],
             )
         )
+        
 
         if not response_tag:
             raise TransmissionError()
