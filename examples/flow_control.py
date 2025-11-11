@@ -10,5 +10,5 @@ controller.set_setpoint(0.0)
 print(controller.get_setpoint())
 print(controller._get_device_readings())
 
-controller.tare_flow()
+controller.reset_totalizer()
 

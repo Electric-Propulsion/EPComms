@@ -1,4 +1,4 @@
-from . import ReceivedPacket, TransmittedPacket
+from .packet import ReceivedPacket, TransmittedPacket
 
 
 class String(TransmittedPacket[str, str], ReceivedPacket[str, str]):

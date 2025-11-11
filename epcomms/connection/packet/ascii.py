@@ -1,6 +1,6 @@
 """ASCII packet class"""
 
-from . import ReceivedPacket, TransmittedPacket
+from .packet import ReceivedPacket, TransmittedPacket
 
 
 class ASCII(TransmittedPacket[str, bytes], ReceivedPacket[str, bytes]):

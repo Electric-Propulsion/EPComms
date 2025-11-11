@@ -17,5 +17,6 @@
     },
     "cSpell.words": [
         "SCPI"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "strict"
 }

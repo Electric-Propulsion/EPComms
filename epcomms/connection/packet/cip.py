@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Union
 from pycomm3 import Services
 from pycomm3.tag import Tag
 
-from . import ReceivedPacket, TransmittedPacket
+from .packet import ReceivedPacket, TransmittedPacket
 from .cip_datatypes import DataType
 
 
@@ -15,7 +15,7 @@ class CIPData:
     class_code: int
     instance: int
     attribute: int
-    data_type: DataType
+    data_type: Optional[Union[type[DataType], DataType]]= None
     service: Union[int, bytes] = Services.get_attribute_single
     parameters: Union[int, float, str, bytes] = b""
 
@@ -46,12 +46,16 @@ class CIPTX(TransmittedPacket[CIPData, CIPGenericMessageContent]):
                 "attribute": self._data.attribute,
                 "request_data": (
                     self._data.data_type.encode(self._data.parameters)
-                    if self._data.parameters != b""
+                    if self._data.parameters != b"" and self._data.data_type is not None
                     else b""
                 ),
                 "data_type": self._data.data_type,
             }
         )
+
+    @classmethod
+    def from_data(cls, data: CIPData) -> "CIPTX":
+        return cls(data)
 
 
 class CIPRX(ReceivedPacket[Union[str, int, float], Tag]):

@@ -11,7 +11,7 @@ import pyvisa
 
 from epcomms.connection.packet import String
 
-from . import Transmission
+from .transmission import Transmission
 
 
 class Visa(Transmission[String, String]):

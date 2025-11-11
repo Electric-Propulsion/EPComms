@@ -10,7 +10,7 @@ import websockets
 
 from epcomms.connection.packet import String
 
-from . import Transmission, TransmissionError
+from .transmission import Transmission, TransmissionError
 
 
 class Socket(Transmission[String, String]):

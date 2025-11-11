@@ -33,7 +33,7 @@ from pycomm3.tag import Tag
 
 from epcomms.connection.packet import CIPRX, CIPTX
 
-from . import Transmission, TransmissionError
+from .transmission import Transmission, TransmissionError
 
 
 class EthernetIP(Transmission[CIPRX, CIPTX]):

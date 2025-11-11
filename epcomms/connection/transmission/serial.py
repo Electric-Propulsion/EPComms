@@ -2,7 +2,7 @@ from serial import Serial as Pyserial
 
 from epcomms.connection.packet import ASCII
 
-from . import Transmission
+from .transmission import Transmission
 
 
 class Serial(Transmission[ASCII, ASCII]):

@@ -3,7 +3,7 @@ import telnetlib
 
 from epcomms.connection.packet import ASCII
 
-from . import Transmission
+from .transmission import Transmission
 
 
 class Telnet(Transmission[ASCII, ASCII]):
