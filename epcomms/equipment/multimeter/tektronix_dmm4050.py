@@ -1,15 +1,15 @@
+from epcomms.connection.packet import ASCII
 from epcomms.connection.transmission import Telnet
-from epcomms.connection.packet import ASCII 
+
 from . import SCPIMultimeter
 
-class TektronixDMM4050(SCPIMultimeter):
 
-    def __init__(self, host:str, port:int):
-        transmission = Telnet(host, port, "\n", 5, ASCII)
-        super().__init__(transmission)
+class TektronixDMM4050(SCPIMultimeter[ASCII]):
+
+    def __init__(self, host: str, port: int):
+        transmission = Telnet(host, port, "\n", 5)
+        super().__init__(transmission, ASCII)
         self.command_remote()
-    
-
 
     def command_remote(self) -> None:
         """
@@ -22,7 +22,9 @@ class TektronixDMM4050(SCPIMultimeter):
         Returns:
             None
         """
-        self.transmission.command(ASCII(self.generate_command("SYST:REM")))
+        self.transmission.command(
+            self._packet.from_data(self.generate_command("SYST:REM"))
+        )
 
     def command_local(self) -> None:
         """
@@ -35,8 +37,9 @@ class TektronixDMM4050(SCPIMultimeter):
         Returns:
             None
         """
-        self.transmission.command(ASCII(self.generate_command("SYST:LOC")))
-
+        self.transmission.command(
+            self._packet.from_data(self.generate_command("SYST:LOC"))
+        )
 
     def display_text(self, text: str) -> None:
         """
@@ -52,7 +55,11 @@ class TektronixDMM4050(SCPIMultimeter):
         Returns:
             None
         """
-        self.transmission.command(ASCII(self.generate_command("DISP:TEXT", arguments=f'"{text}"')))
+        self.transmission.command(
+            self._packet.from_data(
+                self.generate_command("DISP:TEXT", arguments=f'"{text}"')
+            )
+        )
 
     def clear_text(self) -> None:
         """
@@ -65,4 +72,6 @@ class TektronixDMM4050(SCPIMultimeter):
         Returns:
             None
         """
-        self.transmission.command(ASCII(self.generate_command("DISP:TEXT:CLE")))
+        self.transmission.command(
+            self._packet.from_data(self.generate_command("DISP:TEXT:CLE"))
+        )

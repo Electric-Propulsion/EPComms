@@ -3,13 +3,20 @@ KeysightEDU34550A Multimeter Control
 This module provides an interface to control the Keysight EDU34550A multimeter.
 """
 
-from epcomms.connection.transmission import Visa
-from epcomms.connection.packet import ASCII
+# TODO: This entire class should be refactored to use the be a SCPIMultimeter.
+
 from typing import Union
+
+from epcomms.connection.packet import String
+from epcomms.connection.transmission import Visa
+
 from . import Multimeter
 
+RangeT = Union[str, int, float]  # TODO: These are probably better as Literal types
+ResolutionT = str  # TODO: These are probably better as Literal types
 
-class KeysightEDU34450A(Multimeter):
+
+class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
     """
     A class to represent the Keysight EDU34450A multimeter.
     Attributes
@@ -22,7 +29,7 @@ class KeysightEDU34450A(Multimeter):
         Initializes the multimeter with the given resource name.
     """
 
-    def __init__(self, resource_name) -> None:
+    def __init__(self, resource_name: str) -> None:
         """
         Initializes the Keysight EDU34450A multimeter.
 
@@ -46,9 +53,13 @@ class KeysightEDU34450A(Multimeter):
         Returns:
             None
         """
-        self.transmission.command(ASCII("SYST:BEEP"))
+        self.transmission.command(String.from_data("SYST:BEEP"))
 
-    def measure_voltage_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
+    def measure_voltage_ac(
+        self,
+        measurement_range: RangeT = "AUTO",
+        resolution: ResolutionT = "DEF",
+    ) -> float:
         """Measures AC voltage using a specified measurement range, on a specified channel.
 
         Args:
@@ -61,21 +72,39 @@ class KeysightEDU34450A(Multimeter):
         """
 
         try:
-            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(
+                measurement_range, (float, int)
+            ) or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
-        
-        try:
-            assert resolution.upper() in {'DEF','MAX','MIN'} 
-        except AssertionError:
-            raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
+            raise ValueError(
+                f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
 
-        
-        
-        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:VOLTAGE:AC? {range_str},{resolution}")).data)
-    
-    def measure_voltage_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
+        try:
+            assert resolution.upper() in {"DEF", "MAX", "MIN"}
+        except AssertionError:
+            raise ValueError(
+                f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+        return float(
+            self.transmission.poll(
+                String.from_data(
+                    f"MEASURE:PRIMARY:VOLTAGE:AC? {range_str},{resolution}"
+                )
+            ).serialize()
+        )
+
+    def measure_voltage_dc(
+        self,
+        measurement_range: RangeT = "AUTO",
+        resolution: ResolutionT = "DEF",
+    ) -> float:
         """Measures DC voltage using a specified measurement range, on a specified channel.
 
         Args:
@@ -86,20 +115,37 @@ class KeysightEDU34450A(Multimeter):
             float: The measured voltage value.
         """
         try:
-            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(
+                measurement_range, (float, int)
+            ) or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
-        
-        try:
-            assert resolution.upper() in {'DEF','MAX','MIN'} 
-        except AssertionError:
-            raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
+            raise ValueError(
+                f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
 
-        
-        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:VOLTAGE:DC? {range_str},{resolution}")).data)
-    
-    def measure_capacitance(self, measurement_range: Union[str|int] = 'AUTO', resolution: str = 'DEF') -> float:
+        try:
+            assert resolution.upper() in {"DEF", "MAX", "MIN"}
+        except AssertionError:
+            raise ValueError(
+                f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+        return float(
+            self.transmission.poll(
+                String.from_data(
+                    f"MEASURE:PRIMARY:VOLTAGE:DC? {range_str},{resolution}"
+                )
+            ).deserialize()
+        )
+
+    def measure_capacitance(
+        self, measurement_range: RangeT = "AUTO", resolution: ResolutionT = "DEF"
+    ) -> float:
         """Measures capacitance using a specified measurement range, on the 'PRIMARY' channel.
 
         Args:
@@ -110,27 +156,47 @@ class KeysightEDU34450A(Multimeter):
             float: The measured capacitance value.
         """
         try:
-            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(
+                measurement_range, (float, int)
+            ) or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
-        
+            raise ValueError(
+                f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
+
         try:
-            assert resolution.upper() in {'DEF','MAX','MIN'} 
+            assert resolution.upper() in {"DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
-        
-        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CAPACITANCE? {range_str},{resolution}")).data)
-    
+            raise ValueError(
+                f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+        return float(
+            self.transmission.poll(
+                String.from_data(
+                    f"MEASURE:PRIMARY:CAPACITANCE? {range_str},{resolution}"
+                )
+            ).deserialize()
+        )
+
     def measure_continuity_raw(self) -> float:
         """Performs a 2-wire continuity test.
 
         Returns:
-            float: A resistance reading, as returned by the instrument during continuity tests. 
+            float: A resistance reading, as returned by the instrument during continuity tests.
         """
-        #TODO confirm return value when instrument sees an open circuit (>1.2 kOhm). Programmer guide is unclear.
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CONTINUITY?")).data)
-    
+        # TODO confirm return value when instrument sees an open circuit (>1.2 kOhm). Programmer guide is unclear.
+        return float(
+            self.transmission.poll(
+                String.from_data(f"MEASURE:PRIMARY:CONTINUITY?")
+            ).deserialize()
+        )
+
     def measure_continuity(self) -> bool:
         """Performs a 2-wire continuity test. The Keysight's internal threshold for continuity is 10 Ohms.
 
@@ -138,8 +204,12 @@ class KeysightEDU34450A(Multimeter):
             bool: True if continuity is detected, otherwise false.
         """
         return True if self.measure_continuity_raw() <= 10.0 else False
-    
-    def measure_current_ac(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
+
+    def measure_current_ac(
+        self,
+        measurement_range: RangeT = "AUTO",
+        resolution: ResolutionT = "DEF",
+    ) -> float:
         """Measures AC current using a specified measurement range, on a specified channel.
 
         Args:
@@ -150,19 +220,39 @@ class KeysightEDU34450A(Multimeter):
             float: The measured current value.
         """
         try:
-            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(
+                measurement_range, (float, int)
+            ) or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
-        
+            raise ValueError(
+                f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
+
         try:
-            assert resolution.upper() in {'DEF','MAX','MIN'} 
+            assert resolution.upper() in {"DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
-        
-        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CURRENT:AC? {range_str},{resolution}")).data)
-    
-    def measure_current_dc(self, measurement_range: Union[str|int|float] = 'AUTO', resolution: str = 'DEF') -> float:
+            raise ValueError(
+                f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+        return float(
+            self.transmission.poll(
+                String.from_data(
+                    f"MEASURE:PRIMARY:CURRENT:AC? {range_str},{resolution}"
+                )
+            ).deserialize()
+        )
+
+    def measure_current_dc(
+        self,
+        measurement_range: RangeT = "AUTO",
+        resolution: ResolutionT = "DEF",
+    ) -> float:
         """Measures DC current using a specified measurement range, on a specified channel.
 
         Args:
@@ -173,27 +263,52 @@ class KeysightEDU34450A(Multimeter):
             float: The measured current value.
         """
         try:
-            assert isinstance(measurement_range, (float,int)) or measurement_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(
+                measurement_range, (float, int)
+            ) or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
-        
+            raise ValueError(
+                f"Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
+
         try:
-            assert resolution.upper() in {'DEF','MAX','MIN'} 
+            assert resolution.upper() in {"DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'.")
-        
-        range_str = measurement_range if isinstance(measurement_range, str) else f"{measurement_range:.2e}"
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:CURRENT:DC? {range_str},{resolution}")).data)
-    
+            raise ValueError(
+                f"Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+        return float(
+            self.transmission.poll(
+                String.from_data(
+                    f"MEASURE:PRIMARY:CURRENT:DC? {range_str},{resolution}"
+                )
+            ).deserialize()
+        )
+
     def measure_diode(self) -> float:
         """Performs a diode test.
 
         Returns:
-            float: A voltage reading, as returned by the instrument during diode tests, if the voltage is in the range [0,1.2]. If the signal is greater than 1.2V then the value +9.9e+37 is returned. 
+            float: A voltage reading, as returned by the instrument during diode tests, if the voltage is in the range [0,1.2]. If the signal is greater than 1.2V then the value +9.9e+37 is returned.
         """
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:DIODE?")).data)
-    
-    def measure_frequency(self, freq_range: Union[str|int|float] = 'DEF', freq_resolution: str = 'DEF', volt_range: Union[str|int|float] = 0.1) -> float:
+        return float(
+            self.transmission.poll(
+                String.from_data(f"MEASURE:PRIMARY:DIODE?")
+            ).deserialize()
+        )
+
+    def measure_frequency(
+        self,
+        freq_range: Union[str | int | float] = "DEF",
+        freq_resolution: str = "DEF",
+        volt_range: Union[str | int | float] = 0.1,
+    ) -> float:
         """Measures frequency of an AC volage signal at a desired resolution using a specified frequency range, on a specified channel.
 
         Before frequency measurement, the AC voltage range is configured. As per the programmer guide, the voltage range should be "at least" 0.1V for accurate frequency measurements.
@@ -207,31 +322,52 @@ class KeysightEDU34450A(Multimeter):
             float: The measured current value.
         """
         try:
-            assert isinstance(freq_range, (float,int)) or freq_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(freq_range, (float, int)) or freq_range.upper() in {
+                "AUTO",
+                "DEF",
+                "MAX",
+                "MIN",
+            }
         except AssertionError:
-            raise ValueError(f"Invalid value for freq_range. Freq_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
-        
+            raise ValueError(
+                f"Invalid value for freq_range. Freq_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
+
         try:
-            assert freq_resolution.upper() in {'DEF','MAX','MIN'} 
+            assert freq_resolution.upper() in {"DEF", "MAX", "MIN"}
         except AssertionError:
-            raise ValueError(f"Invalid value for freq_resolution. Resolution must be one of 'DEF','MAX','MIN'.")
-        
+            raise ValueError(
+                f"Invalid value for freq_resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
         try:
-            assert isinstance(volt_range, (float,int)) or volt_range.upper() in {'AUTO','DEF','MAX','MIN'} 
+            assert isinstance(volt_range, (float, int)) or volt_range.upper() in {
+                "AUTO",
+                "DEF",
+                "MAX",
+                "MIN",
+            }
         except AssertionError:
-            raise ValueError(f"Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'.")
+            raise ValueError(
+                f"Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
 
         range_str = freq_range if isinstance(freq_range, str) else f"{freq_range:.2e}"
         self.transmission.command(f"SENSE:PRIMARY:FREQUENCY:VOLTAGE:RANGE {volt_range}")
-        return float(self.transmission.poll(ASCII(f"MEASURE:PRIMARY:FREQUENCY? {range_str},{freq_resolution}")).data)
-    
+        return float(
+            self.transmission.poll(
+                String.from_data(
+                    f"MEASURE:PRIMARY:FREQUENCY? {range_str},{freq_resolution}"
+                )
+            ).deserialize()
+        )
+
     def read_errors(self):
+        # TODO: WTF is this?? Return the errors instead.
         i = 0
         while True:
-            err = self.transmission.poll(ASCII(f"SYST:ERR?")).data
+            err = self.transmission.poll(String.from_data(f"SYST:ERR?")).deserialize()
             print(err)
             i += 1
             if err == '+0, "No error"' or i >= 20:
                 break
-
-
