@@ -1,10 +1,15 @@
 """AlicatEIP class for communication with Alicat EIP flow control devices over EthernetIP"""
 
+from dataclasses import dataclass
+
 from epcomms.connection.packet import CIPTX, CIPData
 from epcomms.connection.packet.cip_datatypes import REAL, STRING, UDINT, UINT, WORD
 from epcomms.connection.transmission import EthernetIP, TransmissionError
+
 from .flow_controller import FlowController
-from dataclasses import dataclass
+
+# TODO: fix. refactor. Doesn't, uh, work.
+
 
 @dataclass
 class DeviceReadings:
@@ -18,6 +23,7 @@ class DeviceReadings:
     mass_flow: float
     mass_flow_setpoint: float
 
+
 class AlicatEIP(FlowController[EthernetIP]):
     """AlicatEIP class for communication with Alicat devices over EthernetIP."""
 
@@ -30,7 +36,6 @@ class AlicatEIP(FlowController[EthernetIP]):
         "serial_number": (6, UDINT),
         "product_name": (7, STRING),
     }
-
 
     def __init__(self, routing_path: str):
         transmission = EthernetIP(routing_path)
@@ -82,7 +87,9 @@ class AlicatEIP(FlowController[EthernetIP]):
         Returns:
             float: The current setpoint value.
         """
-        packet = CIPTX.from_data(CIPData(class_code=4, instance=100, attribute=3, data_type=REAL))
+        packet = CIPTX.from_data(
+            CIPData(class_code=4, instance=100, attribute=3, data_type=REAL)
+        )
         response = self.transmission.poll(packet)
         return float(response.deserialize())
 
@@ -96,13 +103,15 @@ class AlicatEIP(FlowController[EthernetIP]):
         Returns:
             None
         """
-        packet = CIPTX.from_data(CIPData(
-            class_code=4,
-            instance=100,
-            attribute=3,
-            data_type=REAL,
-            request_data=setpoint,
-        ))
+        packet = CIPTX.from_data(
+            CIPData(
+                class_code=4,
+                instance=100,
+                attribute=3,
+                data_type=REAL,
+                request_data=setpoint,
+            )
+        )
 
         self.transmission.command(packet)
 
@@ -196,7 +205,6 @@ class AlicatEIP(FlowController[EthernetIP]):
 
         if not isinstance(status, int):
             raise TransmissionError("Status value is not an integer.")
-        
 
         return {
             "temp_overflow": bool(status & 0b000000000000001),
@@ -229,12 +237,7 @@ class AlicatEIP(FlowController[EthernetIP]):
                 - "mass_flow" (float): The mass flow rate.
                 - "mass_flow_setpoint" (float): The mass flow setpoint.
         """
-        packet = CIPTX.from_data(CIPData(
-            class_code=4,
-            instance=101,
-            attribute=3
-            )
-        )
+        packet = CIPTX.from_data(CIPData(class_code=4, instance=101, attribute=3))
 
         data = self.transmission.poll(packet).deserialize()
         if not isinstance(data, bytes) or isinstance(data, str):
@@ -262,18 +265,17 @@ class AlicatEIP(FlowController[EthernetIP]):
             TransmissionError: If the device does not acknowledge the command correctly.
         """
         params = UINT.encode(command_id) + UINT.encode(argument)
-        packet = CIPTX.from_data(CIPData(class_code=4, instance=102, attribute=3, request_data=params))
+        packet = CIPTX.from_data(
+            CIPData(class_code=4, instance=102, attribute=3, request_data=params)
+        )
         self.transmission.command(packet)
         check_packet = CIPTX.from_data(CIPData(class_code=4, instance=102, attribute=3))
-        
+
         data = self.transmission.poll(check_packet).deserialize()
         if not isinstance(data, bytes) or isinstance(data, str):
             # str is a subclass of bytes(?), so check that explicitly.
-            raise TransmissionError("Device readings response is not bytes.")        
-        if (
-            UINT.decode(data[0:2]) != command_id
-            or UINT.decode(data[2:4]) != argument
-        ):
+            raise TransmissionError("Device readings response is not bytes.")
+        if UINT.decode(data[0:2]) != command_id or UINT.decode(data[2:4]) != argument:
             raise TransmissionError("Device did not acknowledge command.")
 
     def _get_identity_element(self, element: str) -> int | str:
@@ -285,16 +287,18 @@ class AlicatEIP(FlowController[EthernetIP]):
             Union[int, str]: The value of the requested identity element,
             which can be either an integer or a string.
         """
-        packet = CIPTX.from_data(CIPData(
-            class_code=1,
-            instance=1,
-            attribute=self._identity_lut[element][0],
-            data_type=self._identity_lut[element][1],
-        ))
+        packet = CIPTX.from_data(
+            CIPData(
+                class_code=1,
+                instance=1,
+                attribute=self._identity_lut[element][0],
+                data_type=self._identity_lut[element][1],
+            )
+        )
 
         response = self.transmission.poll(packet)
 
         data = response.deserialize()
         if isinstance(data, float):
             raise TransmissionError("Received float when int or str was expected.")
-        return data 
+        return data
