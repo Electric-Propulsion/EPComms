@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 from typing import Optional, TypedDict, Union
 
-from pycomm3 import Services
 from pycomm3.tag import Tag
 
 from .packet import ReceivedPacket, TransmittedPacket
@@ -16,12 +15,10 @@ class CIPData:
     instance: int
     attribute: int
     data_type: Optional[Union[type[DataType], DataType]]= None
-    service: Union[int, bytes] = Services.get_attribute_single
-    parameters: Union[int, float, str, bytes] = b""
+    request_data: Union[int, float, str, bytes] = b""
 
 
 class CIPGenericMessageContent(TypedDict):
-    service: Union[int, bytes]
     class_code: Union[int, bytes]
     instance: Union[int, bytes]
     attribute: Union[int, bytes]
@@ -40,14 +37,13 @@ class CIPTX(TransmittedPacket[CIPData, CIPGenericMessageContent]):
     def serialize(self) -> CIPGenericMessageContent:
         return CIPGenericMessageContent(
             {
-                "service": self._data.service,
                 "class_code": self._data.class_code,
                 "instance": self._data.instance,
                 "attribute": self._data.attribute,
                 "request_data": (
-                    self._data.data_type.encode(self._data.parameters)
-                    if self._data.parameters != b"" and self._data.data_type is not None
-                    else b""
+                    self._data.data_type.encode(self._data.request_data)
+                    if self._data.request_data != b"" and self._data.data_type is not None
+                    else self._data.request_data
                 ),
                 "data_type": self._data.data_type,
             }

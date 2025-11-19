@@ -3,7 +3,6 @@
 from epcomms.connection.packet import CIPTX, CIPData
 from epcomms.connection.packet.cip_datatypes import REAL, STRING, UDINT, UINT, WORD
 from epcomms.connection.transmission import EthernetIP, TransmissionError
-
 from .flow_controller import FlowController
 from dataclasses import dataclass
 
@@ -102,7 +101,7 @@ class AlicatEIP(FlowController[EthernetIP]):
             instance=100,
             attribute=3,
             data_type=REAL,
-            parameters=setpoint,
+            request_data=setpoint,
         ))
 
         self.transmission.command(packet)
@@ -263,19 +262,14 @@ class AlicatEIP(FlowController[EthernetIP]):
             TransmissionError: If the device does not acknowledge the command correctly.
         """
         params = UINT.encode(command_id) + UINT.encode(argument)
-        packet = CIPTX.from_data(CIPData(class_code=4, instance=102, attribute=3, parameters=params))
-        self.transmission.poll(packet)
-        print(params)
-        check_packet = CIPTX.from_data(CIPData(class_code=4, instance=103, attribute=3))
+        packet = CIPTX.from_data(CIPData(class_code=4, instance=102, attribute=3, request_data=params))
+        self.transmission.command(packet)
+        check_packet = CIPTX.from_data(CIPData(class_code=4, instance=102, attribute=3))
         
         data = self.transmission.poll(check_packet).deserialize()
         if not isinstance(data, bytes) or isinstance(data, str):
             # str is a subclass of bytes(?), so check that explicitly.
-            raise TransmissionError("Device readings response is not bytes.")
-        print("Expected:")
-        print(UINT.decode(data[0:2]), command_id)
-        print(UINT.decode(data[2:4]), argument)
-        
+            raise TransmissionError("Device readings response is not bytes.")        
         if (
             UINT.decode(data[0:2]) != command_id
             or UINT.decode(data[2:4]) != argument
@@ -301,7 +295,6 @@ class AlicatEIP(FlowController[EthernetIP]):
         response = self.transmission.poll(packet)
 
         data = response.deserialize()
-        print(data)
         if isinstance(data, float):
             raise TransmissionError("Received float when int or str was expected.")
         return data 

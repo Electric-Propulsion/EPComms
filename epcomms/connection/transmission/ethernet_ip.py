@@ -28,7 +28,7 @@ Classes:
                     CIPRX: The data received from the device.
 """
 
-from pycomm3 import CIPDriver
+from pycomm3 import CIPDriver, Services
 from pycomm3.tag import Tag
 
 from epcomms.connection.packet import CIPRX, CIPTX
@@ -61,20 +61,17 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
         if not self.driver.connected:
             self.driver.open()
         serialized_packet = packet.serialize()
-        print(serialized_packet)
         repsonse_tag: Tag = (
             self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
-                service=serialized_packet["service"],
+                service=Services.set_attribute_single,
                 class_code=serialized_packet["class_code"],
                 instance=serialized_packet["instance"],
                 attribute=serialized_packet["attribute"],
                 request_data=serialized_packet["request_data"],
-                data_type=serialized_packet["data_type"],
             )
         )
 
         if not repsonse_tag:
-            print(repsonse_tag)
             raise TransmissionError()
 
     def _read(self) -> CIPRX:
@@ -95,10 +92,9 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
             self.driver.open()
 
         serialized_packet = packet.serialize()
-        print(serialized_packet)
         response_tag = (
             self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
-                service=serialized_packet["service"],
+                service=Services.get_attribute_single,
                 class_code=serialized_packet["class_code"],
                 instance=serialized_packet["instance"],
                 attribute=serialized_packet["attribute"],
