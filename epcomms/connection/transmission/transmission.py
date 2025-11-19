@@ -36,7 +36,7 @@ class Transmission(ABC, Generic[RX_Packet, TX_Packet]):
     """Abstract base class for handling packet transmission."""
 
     def __init__(self) -> None:
-        self._lock = Lock()
+        self._lock: Lock = Lock()
 
     @abstractmethod
     def _command(self, packet: TX_Packet) -> None:
