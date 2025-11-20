@@ -63,9 +63,3 @@ class Multimeter(
         resolution: ResolutionT = None,
     ) -> float:
         raise NotImplementedError
-
-    @abstractmethod
-    def measure_frequency(
-        self, freq_range: RangeT, freq_resolution: ResolutionT, volt_range
-    ) -> float:
-        raise NotImplementedError

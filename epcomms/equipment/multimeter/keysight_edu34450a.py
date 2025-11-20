@@ -97,7 +97,7 @@ class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
                 String.from_data(
                     f"MEASURE:PRIMARY:VOLTAGE:AC? {range_str},{resolution}"
                 )
-            ).serialize()
+            ).deserialize()
         )
 
     def measure_voltage_dc(
@@ -305,9 +305,9 @@ class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
 
     def measure_frequency(
         self,
-        freq_range: Union[str | int | float] = "DEF",
-        freq_resolution: str = "DEF",
-        volt_range: Union[str | int | float] = 0.1,
+        measurement_range: RangeT = "DEF",
+        resolution: ResolutionT = "DEF",
+        amplitude_range: RangeT = 0.1,
     ) -> float:
         """Measures frequency of an AC volage signal at a desired resolution using a specified frequency range, on a specified channel.
 
@@ -322,7 +322,9 @@ class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
             float: The measured current value.
         """
         try:
-            assert isinstance(freq_range, (float, int)) or freq_range.upper() in {
+            assert isinstance(
+                measurement_range, (float, int)
+            ) or measurement_range.upper() in {
                 "AUTO",
                 "DEF",
                 "MAX",
@@ -334,14 +336,16 @@ class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
             )
 
         try:
-            assert freq_resolution.upper() in {"DEF", "MAX", "MIN"}
+            assert resolution.upper() in {"DEF", "MAX", "MIN"}
         except AssertionError:
             raise ValueError(
                 f"Invalid value for freq_resolution. Resolution must be one of 'DEF','MAX','MIN'."
             )
 
         try:
-            assert isinstance(volt_range, (float, int)) or volt_range.upper() in {
+            assert isinstance(
+                amplitude_range, (float, int)
+            ) or amplitude_range.upper() in {
                 "AUTO",
                 "DEF",
                 "MAX",
@@ -352,13 +356,17 @@ class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
                 f"Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
             )
 
-        range_str = freq_range if isinstance(freq_range, str) else f"{freq_range:.2e}"
-        self.transmission.command(f"SENSE:PRIMARY:FREQUENCY:VOLTAGE:RANGE {volt_range}")
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+        self.transmission.command(
+            String.from_data(f"SENSE:PRIMARY:FREQUENCY:VOLTAGE:RANGE {amplitude_range}")
+        )
         return float(
             self.transmission.poll(
-                String.from_data(
-                    f"MEASURE:PRIMARY:FREQUENCY? {range_str},{freq_resolution}"
-                )
+                String.from_data(f"MEASURE:PRIMARY:FREQUENCY? {range_str},{resolution}")
             ).deserialize()
         )
 
