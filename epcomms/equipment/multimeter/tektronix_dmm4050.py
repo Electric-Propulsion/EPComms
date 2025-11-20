@@ -4,7 +4,7 @@ from epcomms.connection.transmission import Telnet
 from . import SCPIMultimeter
 
 
-class TektronixDMM4050(SCPIMultimeter[ASCII]):
+class TektronixDMM4050(SCPIMultimeter[Telnet]):
 
     def __init__(self, host: str, port: int):
         transmission = Telnet(host, port, "\n", 5)

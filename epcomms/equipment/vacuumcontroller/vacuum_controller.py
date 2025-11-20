@@ -1,6 +1,8 @@
 # pylint: disable=missing-module-docstring
-from epcomms.equipment.base import Instrument
+from epcomms.equipment.base import Instrument, TransmissionType
 
 
-class VacuumController(Instrument):  # pylint: disable=missing-class-docstring
+class VacuumController(
+    Instrument[TransmissionType]
+):  # pylint: disable=missing-class-docstring
     pass
