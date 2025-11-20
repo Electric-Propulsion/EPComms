@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring
 # TODO: Add docstrings # pylint: disable=fixme
-from typing import ClassVar, Literal, Union
+from typing import Literal
 
 from epcomms.connection.packet import ASCII
 from epcomms.connection.transmission import Serial, TransmissionError
@@ -137,16 +137,12 @@ class Fluke45(Multimeter[Serial, RangeT, ResolutionT]):
         return float(data)
 
     def measure_frequency(
-        self, freq_range=None, freq_resolution=None, volt_range=None
+        self, measurement_range: RangeT = None, resolution: ResolutionT = None
     ) -> float:
-        if volt_range is not None:
-            raise ValueError(
-                "The Fluke 45 does not support setting the voltage range for frequency measurements"
-            )
         self.transmission.command(ASCII("FREQ\r"))
         self.read_fluke_status()
-        self.set_range(freq_range)
-        self.set_resolution(freq_resolution)
+        self.set_range(measurement_range)
+        self.set_resolution(resolution)
         data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
         self.read_fluke_status()
         return float(data)

@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Union
+from typing import TypeVar, Union
 
 from epcomms.connection.packet import ASCII, String
 from epcomms.connection.transmission import Transmission
@@ -297,9 +297,9 @@ class SCPIMultimeter(
 
     def measure_frequency(
         self,
-        freq_range: Union[str | int | float] = "DEF",
-        freq_resolution: str = "DEF",
-        volt_range: Union[str | int | float] = 0.1,
+        measurement_range: RangeT = None,
+        resolution: ResolutionT = None,
+        amplitude_range: RangeT = None,
     ) -> float:
         """Measures frequency of an AC volage signal at a desired resolution using a specified frequency range, on a specified channel.
 
@@ -313,9 +313,17 @@ class SCPIMultimeter(
         Returns:
             float: The measured current value.
         """
+
+        if measurement_range is None:
+            measurement_range = "AUTO"
+        if resolution is None:
+            resolution = "DEF"
+        if amplitude_range is None:
+            amplitude_range = 0.1
+
         if not (
-            isinstance(freq_range, (float, int))
-            or freq_range.upper()
+            isinstance(measurement_range, (float, int))
+            or measurement_range.upper()
             in {
                 "AUTO",
                 "DEF",
@@ -326,14 +334,14 @@ class SCPIMultimeter(
             raise ValueError(
                 "Invalid value for freq_range. Freq_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
             )
-        elif not freq_resolution.upper() in {"DEF", "MAX", "MIN"}:
+        elif not resolution.upper() in {"DEF", "MAX", "MIN"}:
             raise ValueError(
                 "Invalid value for freq_resolution. Resolution must be one of 'DEF','MAX','MIN'."
             )
 
         elif not (
-            isinstance(volt_range, (float, int))
-            or volt_range.upper()
+            isinstance(amplitude_range, (float, int))
+            or amplitude_range.upper()
             in {
                 "AUTO",
                 "DEF",
@@ -345,17 +353,23 @@ class SCPIMultimeter(
                 "Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
             )
 
-        range_str = freq_range if isinstance(freq_range, str) else f"{freq_range:.2e}"
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
         self.transmission.command(
             self._packet.from_data(
-                self.generate_command("SENS:FREQ:VOLT:RANGE", arguments=volt_range)
+                self.generate_command(
+                    "SENS:FREQ:VOLT:RANGE", arguments=str(amplitude_range)
+                )
             )
         )
         return float(
             self.transmission.poll(
                 self._packet.from_data(
                     self.generate_query(
-                        "MEASURE:FREQUENCY", arguments=[range_str, freq_resolution]
+                        "MEASURE:FREQUENCY", arguments=[range_str, resolution]
                     )
                 )
             ).deserialize()
