@@ -1,1 +1,1 @@
-from .test_instrument import TestInstrument
+from .test_instrument import TestInstrument as TestInstrument

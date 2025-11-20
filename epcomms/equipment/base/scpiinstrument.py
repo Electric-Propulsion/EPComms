@@ -1,4 +1,4 @@
-from typing import Callable, Union
+from typing import Callable, TypeVar, Union
 
 
 class SCPIInstrument:
@@ -53,7 +53,11 @@ class SCPIInstrument:
 
         return f"{query_keyword}?{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channel_str})" if channels else ''}"
 
-    def parse_response(self, conversion_function: Callable[[str], str], response: str):
+    T = TypeVar("T")
+
+    def parse_response(
+        self, conversion_function: Callable[[str], T], response: str
+    ) -> T | list[T]:
         value_list = response.strip("\n").split(",")
         if len(value_list) == 1:
             return conversion_function(value_list[0])

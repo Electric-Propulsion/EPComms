@@ -4,18 +4,20 @@ This module provides an interface to control the Keysight EDU36311A power supply
 """
 
 from typing import Union
+
+from epcomms.connection.packet import String
 from epcomms.connection.transmission import Visa
-from epcomms.connection.packet import ASCII
 from epcomms.equipment.base import SCPIInstrument
+
 from . import PowerSupply
 
 
-class KeysightEDU36311A(PowerSupply, SCPIInstrument):
+class KeysightEDU36311A(PowerSupply[Visa], SCPIInstrument):
     """
     A class to represent the Keysight EDU36311A power supply.
     """
 
-    def __init__(self, resource_name) -> None:
+    def __init__(self, resource_name: str) -> None:
         """
         Initializes the Keysight EDU36311A power supply.
 
@@ -36,7 +38,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         Returns:
             None
         """
-        self.transmission.command(ASCII("SYST:BEEP"))
+        self.transmission.command(String.from_data("SYST:BEEP"))
 
     def set_voltage(self, voltage: float, channel: Union[int, list[int]]) -> None:
         """
@@ -50,10 +52,14 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             None
         """
         self.transmission.command(
-            ASCII(self.generate_command("VOLT", arguments=str(voltage), channels=channel))
+            String.from_data(
+                self.generate_command("VOLT", arguments=str(voltage), channels=channel)
+            )
         )
 
-    def measure_voltage_setpoint(self, channel: Union[int, list[int]]) -> float:
+    def measure_voltage_setpoint(
+        self, channel: Union[int, list[int]]
+    ) -> float | list[float]:
         """
         Measures the voltage on the specified channel of the Keysight EDU36311A power supply.
 
@@ -63,24 +69,28 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         Returns:
             float: The measured voltage value.
         """
-        return self.parse_response(float,
-            self.transmission.poll(ASCII(self.generate_query("VOLT", channels=channel))).data
-        )
-
-    def measure_voltage(self, channel: Union[int, list[int]]) -> float:
-        """
-        Measures the voltage on the specified channel of the Keysight EDU36311A power supply.
-
-        Args:
-            channel (int): The channel number to measure the voltage from.
-
-        Returns:
-            float: The measured voltage value.
-        """
-        return self.parse_response(float,
+        return self.parse_response(
+            float,
             self.transmission.poll(
-                ASCII(self.generate_query("MEAS:VOLT", channels=channel))
-            ).data
+                String.from_data(self.generate_query("VOLT", channels=channel))
+            ).deserialize(),
+        )
+
+    def measure_voltage(self, channel: Union[int, list[int]]) -> float | list[float]:
+        """
+        Measures the voltage on the specified channel of the Keysight EDU36311A power supply.
+
+        Args:
+            channel (int): The channel number to measure the voltage from.
+
+        Returns:
+            float: The measured voltage value.
+        """
+        return self.parse_response(
+            float,
+            self.transmission.poll(
+                String.from_data(self.generate_query("MEAS:VOLT", channels=channel))
+            ).deserialize(),
         )
 
     def set_current_limit(self, current: float, channel: Union[int, list[int]]) -> None:
@@ -95,10 +105,14 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
             None
         """
         self.transmission.command(
-            ASCII(self.generate_command("CURR", arguments=str(current), channels=channel))
+            String.from_data(
+                self.generate_command("CURR", arguments=str(current), channels=channel)
+            )
         )
 
-    def measure_current_limit(self, channel: Union[int, list[int]]) -> float:
+    def measure_current_limit(
+        self, channel: Union[int, list[int]]
+    ) -> float | list[float]:
         """
         Measures the current from the specified channel of the power supply.
 
@@ -108,27 +122,31 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         Returns:
             float: The measured current in amperes.
         """
-        return self.parse_response(float,
-            self.transmission.poll(ASCII(self.generate_query("CURR", channels=channel))).data
-        )
-
-    def measure_current(self, channel: Union[int, list[int]]) -> float:
-        """
-        Measures the current from the specified channel of the power supply.
-
-        Args:
-            channel (int): The channel number to measure the current from.
-
-        Returns:
-            float: The measured current in amperes.
-        """
-        return self.parse_response(float,
+        return self.parse_response(
+            float,
             self.transmission.poll(
-                ASCII(self.generate_query("MEAS:CURR", channels=channel))
-            ).data
+                String.from_data(self.generate_query("CURR", channels=channel))
+            ).deserialize(),
         )
 
-    def get_output(self, channel: Union[int, list[int]]) -> bool:
+    def measure_current(self, channel: Union[int, list[int]]) -> float | list[float]:
+        """
+        Measures the current from the specified channel of the power supply.
+
+        Args:
+            channel (int): The channel number to measure the current from.
+
+        Returns:
+            float: The measured current in amperes.
+        """
+        return self.parse_response(
+            float,
+            self.transmission.poll(
+                String.from_data(self.generate_query("MEAS:CURR", channels=channel))
+            ).deserialize(),
+        )
+
+    def get_output(self, channel: Union[int, list[int]]) -> bool | list[bool]:
         """
         Measures the output status of the specified channel on the Keysight EDU36311A power supply.
 
@@ -138,8 +156,11 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         Returns:
             bool: The output status of the channel.
         """
-        return self.parse_response(lambda value: bool(int(value)), 
-            self.transmission.poll(ASCII(self.generate_query("OUTP", channels=channel))).data
+        return self.parse_response(
+            lambda value: bool(int(value)),
+            self.transmission.poll(
+                String.from_data(self.generate_query("OUTP", channels=channel))
+            ).deserialize(),
         )
 
     def set_output(self, state: bool, channel: Union[int, list[int]]) -> None:
@@ -151,5 +172,7 @@ class KeysightEDU36311A(PowerSupply, SCPIInstrument):
         """
         value = 1 if state else 0
         self.transmission.command(
-            ASCII(self.generate_command("OUTP", arguments=str(value), channels=channel))
+            String.from_data(
+                self.generate_command("OUTP", arguments=str(value), channels=channel)
+            )
         )

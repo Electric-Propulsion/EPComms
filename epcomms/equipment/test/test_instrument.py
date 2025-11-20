@@ -1,8 +1,9 @@
-from epcomms.equipment.base import Instrument
 from numpy import random
 
+from epcomms.equipment.base import Instrument
 
-class TestInstrument(Instrument):
+
+class TestInstrument(Instrument[None]):
     def __init__(self):
         transmission = None
         super().__init__(transmission)
@@ -16,8 +17,8 @@ class TestInstrument(Instrument):
     def get_custom_noise(self, mean: float, std: float) -> float:
         return random.normal(mean, std)
 
-    def echo(self, message: str) -> str:
+    def echo(self, message: str) -> None:
         print(message)
 
-    def echo_count(self, message: str, count: int) -> str:
+    def echo_count(self, message: str, count: int) -> None:
         print(message * count)

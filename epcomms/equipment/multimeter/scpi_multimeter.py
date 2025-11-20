@@ -1,4 +1,4 @@
-from typing import TypeVar, Union
+from typing import Generic, TypeVar, Union
 
 from epcomms.connection.packet import ASCII, String
 from epcomms.connection.transmission import Transmission
@@ -13,7 +13,9 @@ ResolutionT = Union[str, None]
 
 
 class SCPIMultimeter(
-    Multimeter[Transmission[PacketT, PacketT], RangeT, ResolutionT], SCPIInstrument
+    Multimeter[Transmission[PacketT, PacketT], RangeT, ResolutionT],
+    SCPIInstrument,
+    Generic[PacketT],
 ):
     """
     A class to represent a generic SCPI multimeter.

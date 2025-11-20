@@ -4,11 +4,14 @@ for all instruments that can sense the physical environment.
 """
 
 from abc import ABC
-from typing import Any, Generic, TypeVar
+from types import NoneType
+from typing import Any, Generic, TypeVar, Union
 
 from epcomms.connection.transmission import Transmission
 
-TransmissionType = TypeVar("TransmissionType", bound=Transmission[Any, Any])
+TransmissionType = TypeVar(
+    "TransmissionType", bound=Union[Transmission[Any, Any], NoneType]
+)
 
 
 class MeasurementError(Exception):
@@ -34,4 +37,5 @@ class Instrument(ABC, Generic[TransmissionType]):
         self.transmission = transmission
 
     def close(self) -> None:
-        self.transmission.close()
+        if self.transmission is not None:
+            self.transmission.close()
