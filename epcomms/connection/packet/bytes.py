@@ -1,19 +1,26 @@
-from . import Packet
+from .packet import ReceivedPacket, TransmittedPacket
 
-class Bytes(Packet):
+
+class Bytes(
+    ReceivedPacket[bytearray, bytes],
+    TransmittedPacket[bytearray, bytes],
+):
     """Bytes packet class
     Bytes packets are raw byte sequences ."""
 
-    def __init__(self, data: bytearray) -> None:
+    def __init__(self, data: bytes) -> None:
         self._data = data
 
-    def serialize_str(self) -> str:
-        raise NotImplementedError("Cannot serialize bytes to str")
+    def serialize(self) -> bytes:
+        return self._data
 
-    def serialize_bytes(self) -> bytearray:
-        return bytes(self._data)
-    
-    def as_ints(self) -> list[int]:
-        """Return the byte data as a list of integers."""
-        return list(self._data)
-    
+    @classmethod
+    def from_data(cls, data: bytearray) -> "Bytes":
+        return cls(data)
+
+    @classmethod
+    def from_wire(cls, wire: bytes) -> "Bytes":
+        return cls(wire)
+
+    def deserialize(self) -> bytearray:
+        return bytearray(self._data)

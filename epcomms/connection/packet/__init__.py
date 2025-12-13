@@ -1,4 +1,5 @@
 from .ascii import ASCII as ASCII
+from .bytes import Bytes as Bytes
 from .cip import CIPRX as CIPRX
 from .cip import CIPTX as CIPTX
 from .cip import CIPData as CIPData

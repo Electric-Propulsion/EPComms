@@ -17,7 +17,7 @@ class PicoUSBTC08(TemperatureSensor[Socket]):
         self.ip = ip
         self.port = port
         self.ws_url = f"ws://{self.ip}:{str(self.port)}"
-        self.transmission = Socket(self.ws_url)
+        super().__init__(Socket(self.ws_url))
 
         self.open_instrument()
 

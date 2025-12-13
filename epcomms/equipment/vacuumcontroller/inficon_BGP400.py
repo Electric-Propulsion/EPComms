@@ -1,13 +1,55 @@
-from typing import Union, Literal
+import logging
+from dataclasses import dataclass
+from threading import Thread
+from typing import Callable, Literal
+
+from epcomms.connection.packet.bytes import Bytes
+from epcomms.connection.transmission import Serial, TransmissionError
 
 from . import VacuumController
-from epcomms.connection.packet import Bytes
-from epcomms.connection.transmission import ByteSerial, TransmissionError
 
-class InficonBGP400(VacuumController):
-    def __init__(self, device_location):
-        transmission = ByteSerial(device_location)
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class InficonBGP400State:
+    pressure: float | None
+    unit: Literal["mbar", "Torr", "Pa", None]
+    emission: Literal["Off", "25 uA", "5 mA", "Degas"]
+    adjustment: str | None
+    software_version: str
+    toggle_bit: int
+    error_msg: str | None
+
+
+class InficonBGP400(VacuumController[Serial[Bytes]]):
+
+    def __init__(self, device_location: str):
+        transmission = Serial(device_location, packet_type=Bytes)
+        self._subscribers: list[Callable[[InficonBGP400State], None]] = []
         super().__init__(transmission)
+        self._worker_thread = Thread(target=self.read_loop, daemon=True)
+        self._worker_thread.start()
+
+    def register_subscriber(
+        self, callback: Callable[[InficonBGP400State], None]
+    ) -> Callable[[], None]:
+        self._subscribers.append(callback)
+
+        def unregister() -> None:
+            self._subscribers.remove(callback)
+
+        return unregister
+
+    def register_singleshot(
+        self, callback: Callable[[InficonBGP400State], None]
+    ) -> None:
+
+        def self_unregistering_wrapper(state: InficonBGP400State) -> None:
+            callback(state)
+            unregister()
+
+        unregister = self.register_subscriber(self_unregistering_wrapper)
 
     def degass_on(self) -> None:
         packet = Bytes(bytearray([3, 16, 93, 148, 1]))
@@ -16,7 +58,6 @@ class InficonBGP400(VacuumController):
     def degass_off(self) -> None:
         packet = Bytes(bytearray([3, 16, 93, 105, 214]))
         self.transmission.command(packet)
-
 
     def set_mbar(self) -> None:
         packet = Bytes(bytearray([3, 16, 62, 0, 78]))
@@ -31,12 +72,31 @@ class InficonBGP400(VacuumController):
         self.transmission.command(packet)
 
     def read_loop(self) -> None:
-        while(True):
+        while True:
             packet = self.transmission.read()
-            data = packet.as_ints()
-            self.decode_output_packet(data)
+            data = packet.deserialize()
+            try:
+                state = self.decode_output_packet(data)
+            except TransmissionError as e:
+                logger.error(f"Error decoding Inficon BGP400 packet: {e}")
+                continue
 
-    def decode_output_packet(self, packet: list[int]) -> None:
+            for subscriber in self._subscribers:
+                subscriber(state)
+
+    def get_state(self) -> InficonBGP400State:
+        state: InficonBGP400State | None = None
+
+        def callback(input_state: InficonBGP400State) -> None:
+            nonlocal state
+            state = input_state
+
+        self.register_singleshot(callback)
+        if state is None:
+            raise TransmissionError("Failed to get state from Inficon BGP400")
+        return state
+
+    def decode_output_packet(self, packet: bytearray) -> InficonBGP400State:
         length = packet[0]
         page = packet[1]
         status = packet[2]
@@ -54,7 +114,9 @@ class InficonBGP400(VacuumController):
         if sensor_type != 10:
             raise TransmissionError(f"Invalid sensor type: {sensor_type} (expected 10)")
         if checksum != (sum(packet[1:8]) % 256):
-            raise TransmissionError(f"Invalid checksum: {checksum} (expected {(sum(packet[1:8]) % 256)})")
+            raise TransmissionError(
+                f"Invalid checksum: {checksum} (expected {(sum(packet[1:8]) % 256)})"
+            )
 
         emission_status = (status) & 0b11
         match emission_status:
@@ -66,6 +128,8 @@ class InficonBGP400(VacuumController):
                 emission = "5 mA"
             case 0b11:
                 emission = "Degas"
+            case _:
+                raise TransmissionError(f"Invalid emission status: {emission_status}")
 
         adjustment_status = (status >> 2) & 0b1
         match adjustment_status:
@@ -74,7 +138,7 @@ class InficonBGP400(VacuumController):
             case 0b01:
                 adjustment = "1000 mbar adjustment on"
             case _:
-                adjustment = "Unknown adjustment status"
+                adjustment = None
 
         toggle_bit = (status >> 3) & 0b1
 
@@ -87,28 +151,42 @@ class InficonBGP400(VacuumController):
             case 0b10:
                 unit = "Pa"
             case _:
-                unit = "Unknown"
+                unit = None
 
-        match ((error>>4) & 0b1111):
+        match ((error >> 4) & 0b1111):
             case 0b0101:
                 error_msg = "Pirani adjusted poorly"
             case 0b1001:
                 error_msg = "BA error"
             case 0b1001:
                 error_msg = "Pirani error"
+            case _:
+                error_msg = None
 
         software_version_str = f"v{software_version/20.0}"
 
         match unit:
             case "mbar":
-                pressure = 10**(((measurement_MSB * 256) + measurement_LSB) / 4000-12.5)
+                pressure = 10 ** (
+                    ((measurement_MSB * 256) + measurement_LSB) / 4000 - 12.5
+                )
             case "Torr":
-                pressure = 10**(((measurement_MSB * 256) + measurement_LSB) / 4000-12.625)
+                pressure = 10 ** (
+                    ((measurement_MSB * 256) + measurement_LSB) / 4000 - 12.625
+                )
             case "Pa":
-                pressure = 10**(((measurement_MSB * 256) + measurement_LSB) / 4000-10.5)
+                pressure = 10 ** (
+                    ((measurement_MSB * 256) + measurement_LSB) / 4000 - 10.5
+                )
             case _:
-                pressure = -1.0
+                pressure = None
 
-        print(f"Pressure: {pressure} {unit}, Emission: {emission}, Adjustment: {adjustment}, Software Version: {software_version}, toggle: {toggle_bit}, Error: {error_msg if error!=0 else 'None'},")
-
-
+        return InficonBGP400State(
+            pressure=pressure,
+            unit=unit,
+            emission=emission,
+            adjustment=adjustment,
+            software_version=software_version_str,
+            toggle_bit=toggle_bit,
+            error_msg=error_msg,
+        )
