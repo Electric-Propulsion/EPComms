@@ -7,7 +7,12 @@ import time
 from threading import Lock
 from typing import ClassVar
 
+from gpib_ctypes import make_default_gpib
+make_default_gpib()
+
 import pyvisa
+
+
 
 from epcomms.connection.packet import String
 
