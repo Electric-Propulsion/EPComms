@@ -5,13 +5,13 @@ from typing import Literal
 from epcomms.connection.packet import ASCII
 from epcomms.connection.transmission import Serial, TransmissionError
 
-from . import Multimeter
+from .multimeter import Multimeter
 
 RangeT = Literal["AUTO"] | float | int | None
 ResolutionT = Literal["S", "M", "F"] | None
 
 
-class Fluke45(Multimeter[Serial, RangeT, ResolutionT]):
+class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
     # pylint: disable=missing-class-docstring
     # pylint: disable=too-few-public-methods
 
@@ -19,7 +19,7 @@ class Fluke45(Multimeter[Serial, RangeT, ResolutionT]):
 
         if default_meas_rate not in ["F", "M", "S"]:
             raise ValueError("Invalid default measurement rate")
-        super().__init__(transmission=Serial(device_location, terminator="\r"))
+        super().__init__(transmission=Serial(device_location))
         # set up the multimeter to take measurements at the specified rate
         self.transmission.poll(ASCII(f"RATE {default_meas_rate}\r"))
         self.transmission.poll(ASCII("TRIGGER 1\r"))
@@ -30,7 +30,7 @@ class Fluke45(Multimeter[Serial, RangeT, ResolutionT]):
         # if it's unhappy
 
         status = self.transmission.read().deserialize()
-        if len(status) != 3 or status[1:-1] != ">":
+        if len(status) != 2 or status[-1] != ">":
             raise TransmissionError("Fluke 45 Invalid status string")
         if status[0] == "?":
             raise TransmissionError("Fluke 45 Command Error")

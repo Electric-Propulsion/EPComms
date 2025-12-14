@@ -10,7 +10,7 @@ from typing import Union
 from epcomms.connection.packet import String
 from epcomms.connection.transmission import Visa
 
-from . import Multimeter
+from .multimeter import Multimeter
 
 RangeT = Union[str, int, float]  # TODO: These are probably better as Literal types
 ResolutionT = str  # TODO: These are probably better as Literal types

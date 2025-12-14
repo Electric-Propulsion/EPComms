@@ -27,6 +27,37 @@ class SCPIMultimeter(
         super().__init__(transmission)
         self._packet = packet
 
+    def format_range(self, measurement_range: RangeT) -> str:
+        if measurement_range is None:
+            measurement_range = "DEF"
+
+        if not (
+            isinstance(measurement_range, (float, int))
+            or measurement_range.upper() in {"DEF", "MAX", "MIN"}
+        ):
+            raise ValueError(
+                "Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
+            )
+
+        range_str = (
+            measurement_range
+            if isinstance(measurement_range, str)
+            else f"{measurement_range:.2e}"
+        )
+
+        return range_str
+
+    def format_resolution(self, resolution: ResolutionT) -> str:
+        if resolution is None:
+            resolution = "DEF"
+
+        if not (resolution.upper() in {"DEF", "MAX", "MIN"}):
+            raise ValueError(
+                "Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
+            )
+
+        return resolution
+
     def beep(self) -> None:
         """
         Sends a command to the multimeter to emit a beep sound.
@@ -55,38 +86,20 @@ class SCPIMultimeter(
             float: The measured voltage value.
         """
 
-        if measurement_range is None:
-            measurement_range = "AUTO"
-        if resolution is None:
-            resolution = "DEF"
-
-        if not (
-            isinstance(measurement_range, (float, int))
-            or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
-        ):
-            raise ValueError(
-                "Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
-            )
-        elif not (resolution.upper() in {"DEF", "MAX", "MIN"}):
-            raise ValueError(
-                "Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
-            )
-
-        range_str = (
-            measurement_range
-            if isinstance(measurement_range, str)
-            else f"{measurement_range:.2e}"
-        )
         return float(
             self.transmission.poll(
                 self._packet.from_data(
                     self.generate_query(
-                        "MEAS:VOLT:AC", arguments=[range_str, resolution]
+                        "MEAS:VOLT:AC",
+                        arguments=[
+                            self.format_range(measurement_range),
+                            self.format_resolution(resolution),
+                        ],
                     )
                 )
             ).deserialize()
         )
-
+    
     def measure_voltage_dc(
         self,
         measurement_range: RangeT = None,
@@ -102,34 +115,11 @@ class SCPIMultimeter(
             float: The measured voltage value.
         """
 
-        if measurement_range is None:
-            measurement_range = "AUTO"
-        if resolution is None:
-            resolution = "DEF"
-
-        if not (
-            isinstance(measurement_range, (float, int))
-            or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
-        ):
-            raise ValueError(
-                "Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
-            )
-
-        elif not (resolution.upper() in {"DEF", "MAX", "MIN"}):
-            raise ValueError(
-                "Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
-            )
-
-        range_str = (
-            measurement_range
-            if isinstance(measurement_range, str)
-            else f"{measurement_range:.2e}"
-        )
         return float(
             self.transmission.poll(
                 self._packet.from_data(
                     self.generate_query(
-                        "MEAS:VOLT:DC", arguments=[range_str, resolution]
+                        "MEAS:VOLT:DC", arguments=[self.format_range(measurement_range), self.format_resolution(resolution)]
                     )
                 )
             ).deserialize()
@@ -150,33 +140,16 @@ class SCPIMultimeter(
             float: The measured capacitance value.
         """
 
-        if measurement_range is None:
-            measurement_range = "AUTO"
-        if resolution is None:
-            resolution = "DEF"
-
-        if not (
-            isinstance(measurement_range, (float, int))
-            or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
-        ):
-            raise ValueError(
-                "Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
-            )
-
-        elif not (resolution.upper() in {"DEF", "MAX", "MIN"}):
-            raise ValueError(
-                "Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
-            )
-
-        range_str = (
-            measurement_range
-            if isinstance(measurement_range, str)
-            else f"{measurement_range:.2e}"
-        )
         return float(
             self.transmission.poll(
                 self._packet.from_data(
-                    self.generate_query("MEAS:CAP", arguments=[range_str, resolution])
+                    self.generate_query(
+                        "MEAS:CAP",
+                        arguments=[
+                            self.format_range(measurement_range),
+                            self.format_resolution(resolution),
+                        ],
+                    )
                 )
             ).deserialize()
         )
@@ -217,33 +190,15 @@ class SCPIMultimeter(
             float: The measured current value.
         """
 
-        if measurement_range is None:
-            measurement_range = "AUTO"
-        if resolution is None:
-            resolution = "DEF"
-
-        if not (
-            isinstance(measurement_range, (float, int))
-            or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
-        ):
-            raise ValueError(
-                "Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
-            )
-        elif not (resolution.upper() in {"DEF", "MAX", "MIN"}):
-            raise ValueError(
-                "Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
-            )
-
-        range_str = (
-            measurement_range
-            if isinstance(measurement_range, str)
-            else f"{measurement_range:.2e}"
-        )
         return float(
             self.transmission.poll(
                 self._packet.from_data(
                     self.generate_query(
-                        "MEAS:CURR:AC", arguments=[range_str, resolution]
+                        "MEAS:CURR:AC",
+                        arguments=[
+                            self.format_range(measurement_range),
+                            self.format_resolution(resolution),
+                        ],
                     )
                 )
             ).deserialize()
@@ -263,35 +218,15 @@ class SCPIMultimeter(
         Returns:
             float: The measured current value.
         """
-
-        if measurement_range is None:
-            measurement_range = "AUTO"
-        if resolution is None:
-            resolution = "DEF"
-
-        if not (
-            isinstance(measurement_range, (float, int))
-            or measurement_range.upper() in {"AUTO", "DEF", "MAX", "MIN"}
-        ):
-            raise ValueError(
-                "Invalid value for measurement_range. Measurement_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
-            )
-
-        elif not (resolution.upper() in {"DEF", "MAX", "MIN"}):
-            raise ValueError(
-                "Invalid value for resolution. Resolution must be one of 'DEF','MAX','MIN'."
-            )
-
-        range_str = (
-            measurement_range
-            if isinstance(measurement_range, str)
-            else f"{measurement_range:.2e}"
-        )
         return float(
             self.transmission.poll(
                 self._packet.from_data(
                     self.generate_query(
-                        "MEAS:CURR:DC", arguments=[range_str, resolution]
+                        "MEAS:CURR:DC",
+                        arguments=[
+                            self.format_range(measurement_range),
+                            self.format_resolution(resolution),
+                        ],
                     )
                 )
             ).deserialize()
@@ -316,32 +251,9 @@ class SCPIMultimeter(
             float: The measured current value.
         """
 
-        if measurement_range is None:
-            measurement_range = "AUTO"
-        if resolution is None:
-            resolution = "DEF"
         if amplitude_range is None:
             amplitude_range = 0.1
-
         if not (
-            isinstance(measurement_range, (float, int))
-            or measurement_range.upper()
-            in {
-                "AUTO",
-                "DEF",
-                "MAX",
-                "MIN",
-            }
-        ):
-            raise ValueError(
-                "Invalid value for freq_range. Freq_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
-            )
-        elif not resolution.upper() in {"DEF", "MAX", "MIN"}:
-            raise ValueError(
-                "Invalid value for freq_resolution. Resolution must be one of 'DEF','MAX','MIN'."
-            )
-
-        elif not (
             isinstance(amplitude_range, (float, int))
             or amplitude_range.upper()
             in {
@@ -355,11 +267,6 @@ class SCPIMultimeter(
                 "Invalid value for volt_range. Volt_range must be a numeric value or one of 'AUTO','DEF','MAX','MIN'."
             )
 
-        range_str = (
-            measurement_range
-            if isinstance(measurement_range, str)
-            else f"{measurement_range:.2e}"
-        )
         self.transmission.command(
             self._packet.from_data(
                 self.generate_command(
@@ -371,7 +278,11 @@ class SCPIMultimeter(
             self.transmission.poll(
                 self._packet.from_data(
                     self.generate_query(
-                        "MEASURE:FREQUENCY", arguments=[range_str, resolution]
+                        "MEASURE:FREQUENCY",
+                        arguments=[
+                            self.format_range(measurement_range),
+                            self.format_resolution(resolution),
+                        ],
                     )
                 )
             ).deserialize()

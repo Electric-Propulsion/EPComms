@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 from serial import Serial as Pyserial
 
@@ -15,11 +15,9 @@ class Serial(Transmission[T, T]):
         self,
         device: str,
         baud: int = 9600,
-        frame_terminator: bytes = b"\r\n",
-        frame_prefix: bytes = b"",
-        frame_length: (
-            int | None
-        ) = None,  # number of bytes to read after prefix and before terminator
+        frame_terminator: Optional[bytes] = b"\r\n",
+        frame_prefix: Optional[bytes] = None,
+        frame_length: Optional[int] = None,  # number of bytes to read after prefix and before terminator
         packet_type: type[T] = ASCII,
     ):
         self.driver = Pyserial(device, baud)
@@ -29,7 +27,7 @@ class Serial(Transmission[T, T]):
         self._frame_length = frame_length
         super().__init__()
 
-        if frame_length is None and frame_terminator == b"":
+        if frame_length is None and frame_terminator is None:
             raise ValueError(
                 "At least one of frame_length or frame_terminator must be specified"
             )
@@ -40,15 +38,20 @@ class Serial(Transmission[T, T]):
 
     def _read(self) -> T:
         data = bytes()
-        self.driver.read_until(self._frame_prefix)
+        if self._frame_prefix is not None:
+            self.driver.read_until(self._frame_prefix)
         if self._frame_length is not None:
             data += self.driver.read(self._frame_length)
-            postfix = self.driver.read(len(self._frame_terminator))
-            if postfix != self._frame_terminator:
-                raise RuntimeError("Frame terminator not found where expected")
-        else:
+            if self._frame_terminator is not None:
+                postfix = self.driver.read(len(self._frame_terminator))
+                if postfix != self._frame_terminator:
+                    raise RuntimeError("Frame terminator not found where expected")
+        elif self._frame_terminator is not None:
             data += self.driver.read_until(self._frame_terminator)[
                 : -len(self._frame_terminator)
             ]
+        else:
+            # This should be unreachable due to the check in __init__
+            raise RuntimeError("Unreachable state in Serial read")
 
         return self._packet_type.from_wire(data)

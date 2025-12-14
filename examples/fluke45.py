@@ -1,8 +1,7 @@
 from epcomms.equipment.multimeter.fluke45 import Fluke45
 import time
 
-mm = Fluke45("/dev/ttyUSB0")
-
+mm = Fluke45("/dev/ttyUSB1")
 print(mm.measure_continuity())
 time.sleep(1)
 

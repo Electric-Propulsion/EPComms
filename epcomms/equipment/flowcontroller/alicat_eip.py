@@ -8,7 +8,6 @@ from epcomms.connection.transmission import EthernetIP, TransmissionError
 
 from .flow_controller import FlowController
 
-# TODO: fix. refactor. Doesn't, uh, work.
 
 
 @dataclass
