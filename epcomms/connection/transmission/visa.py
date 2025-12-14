@@ -64,7 +64,6 @@ class Visa(Transmission[String, String]):
         num_attempts = 10
         for i in range(num_attempts):
             try:
-                # self.device = pyvisa.ResourceManager().open_resource(resource_name)
                 time.sleep(0.1)
                 with self.class_lock:
                     device = self.resource_manager.open_resource(
@@ -74,6 +73,7 @@ class Visa(Transmission[String, String]):
                         raise TypeError(
                             "The opened resource is not a MessageBasedResource."
                         )
+                    self.device = device
             except pyvisa.errors.VisaIOError as e:
                 if i == num_attempts - 1:
                     raise (e)
