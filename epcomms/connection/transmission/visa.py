@@ -6,6 +6,8 @@ This module provides the Visa class for handling VISA
 import time
 from threading import Lock
 from typing import ClassVar
+from gpib_ctypes import make_default_gpib
+make_default_gpib()
 
 from gpib_ctypes import make_default_gpib
 make_default_gpib()
