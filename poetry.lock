@@ -38,6 +38,17 @@ graph = ["objgraph (>=1.7.2)"]
 profile = ["gprof2dot (>=2022.7.29)"]
 
 [[package]]
+name = "gpib-ctypes"
+version = "0.3.0"
+description = "GPIB interface for Python implemented using ctypes, API-compatible with linux-gpib."
+optional = false
+python-versions = "*"
+files = [
+    {file = "gpib_ctypes-0.3.0-py2.py3-none-any.whl", hash = "sha256:113bcc95980f7a165ea75ba3d19a1393df3cf27a58af69723e66e746cf32ed51"},
+    {file = "gpib_ctypes-0.3.0.tar.gz", hash = "sha256:73d97a4cd98ce0fb5bbe8a679c58b9475750f68dcc237f411c71cf486a9f8c26"},
+]
+
+[[package]]
 name = "ifaddr"
 version = "0.2.0"
 description = "Cross-platform network interface and IP address enumeration library"
@@ -566,4 +577,4 @@ ifaddr = ">=0.1.7"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "2b243123e566b9c8508a2ab2693268d23a99e3d76232d76e29b86cc311307eea"
+content-hash = "65342579ab84ef085c46a309e82e8092f16ccc41374e0adc187fbf1b18a0aaf7"
