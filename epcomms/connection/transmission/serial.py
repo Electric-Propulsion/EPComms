@@ -33,6 +33,7 @@ class Serial(Transmission[T, T]):
             raise ValueError(
                 "At least one of frame_length or frame_terminator must be specified"
             )
+        
 
     def _command(self, packet: T) -> None:
         self.driver.write(packet.serialize())

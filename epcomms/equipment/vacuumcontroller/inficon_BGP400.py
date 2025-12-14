@@ -1,7 +1,8 @@
 import logging
 from dataclasses import dataclass
-from threading import Thread
+from threading import Thread, Lock
 from typing import Callable, Literal
+from concurrent.futures import Future
 
 from epcomms.connection.packet.bytes import Bytes
 from epcomms.connection.transmission import Serial, TransmissionError
@@ -25,8 +26,9 @@ class InficonBGP400State:
 class InficonBGP400(VacuumController[Serial[Bytes]]):
 
     def __init__(self, device_location: str):
-        transmission = Serial(device_location, packet_type=Bytes)
+        transmission = Serial(device_location, packet_type=Bytes, frame_prefix=b'\x07\x05', frame_length=7, frame_terminator=b'')
         self._subscribers: list[Callable[[InficonBGP400State], None]] = []
+        self._subscriber_lock = Lock()
         super().__init__(transmission)
         self._worker_thread = Thread(target=self.read_loop, daemon=True)
         self._worker_thread.start()
@@ -34,10 +36,12 @@ class InficonBGP400(VacuumController[Serial[Bytes]]):
     def register_subscriber(
         self, callback: Callable[[InficonBGP400State], None]
     ) -> Callable[[], None]:
-        self._subscribers.append(callback)
+        with self._subscriber_lock:
+            self._subscribers.append(callback)
 
         def unregister() -> None:
-            self._subscribers.remove(callback)
+            with self._subscriber_lock:
+                self._subscribers.remove(callback)
 
         return unregister
 
@@ -46,8 +50,10 @@ class InficonBGP400(VacuumController[Serial[Bytes]]):
     ) -> None:
 
         def self_unregistering_wrapper(state: InficonBGP400State) -> None:
-            callback(state)
-            unregister()
+            try:
+                callback(state)
+            finally:
+                unregister()
 
         unregister = self.register_subscriber(self_unregistering_wrapper)
 
@@ -78,44 +84,36 @@ class InficonBGP400(VacuumController[Serial[Bytes]]):
             try:
                 state = self.decode_output_packet(data)
             except TransmissionError as e:
-                logger.error(f"Error decoding Inficon BGP400 packet: {e}")
+                print(f"Error decoding Inficon BGP400 packet: {e}")
                 continue
-
-            for subscriber in self._subscribers:
+            
+            with self._subscriber_lock:
+                subscriber_functions = list(self._subscribers)
+            for subscriber in subscriber_functions:
                 subscriber(state)
 
     def get_state(self) -> InficonBGP400State:
-        state: InficonBGP400State | None = None
-
-        def callback(input_state: InficonBGP400State) -> None:
-            nonlocal state
-            state = input_state
+        future_state = Future[InficonBGP400State]()
+        def callback(state: InficonBGP400State) -> None:
+            future_state.set_result(state)
 
         self.register_singleshot(callback)
-        if state is None:
-            raise TransmissionError("Failed to get state from Inficon BGP400")
-        return state
+        return future_state.result()
 
     def decode_output_packet(self, packet: bytearray) -> InficonBGP400State:
-        length = packet[0]
-        page = packet[1]
-        status = packet[2]
-        error = packet[3]
-        measurement_MSB = packet[4]
-        measurement_LSB = packet[5]
-        software_version = packet[6]
-        sensor_type = packet[7]
-        checksum = packet[8]
+        status = packet[0]
+        error = packet[1]
+        measurement_MSB = packet[2]
+        measurement_LSB = packet[3]
+        software_version = packet[4]
+        sensor_type = packet[5]
+        checksum = packet[6]
 
-        if length != 7:
-            raise TransmissionError(f"Invalid data length: {length} (expected 7)")
-        if page != 5:
-            raise TransmissionError(f"Invalid page number: {page} (expected 5)")
         if sensor_type != 10:
             raise TransmissionError(f"Invalid sensor type: {sensor_type} (expected 10)")
-        if checksum != (sum(packet[1:8]) % 256):
+        if checksum != ((sum(packet[0:6])+5) % 256):
             raise TransmissionError(
-                f"Invalid checksum: {checksum} (expected {(sum(packet[1:8]) % 256)})"
+                f"Invalid checksum: {checksum} (expected {(sum(packet[0:6])+5) % 256})"
             )
 
         emission_status = (status) & 0b11
