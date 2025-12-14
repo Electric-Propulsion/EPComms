@@ -39,7 +39,7 @@ def test1():
 
 def test2_reconnect():
     for _ in range(5):
-        dmm = KeysightEDU34450A("TCPIP::192.168.0.121::INSTR")
+        dmm = KeysightEDU34450A("USB0::10893::36353::CN62350039::0::INSTR")
         dmm.beep()
         meas = dmm.measure_voltage_dc(measurement_range=100, resolution="MIN")
         print(
