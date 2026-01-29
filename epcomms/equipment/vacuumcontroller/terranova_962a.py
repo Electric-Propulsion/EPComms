@@ -5,7 +5,7 @@ from epcomms.equipment.base import MeasurementError
 from . import VacuumController
 
 
-class Terranova962A(VacuumController[Serial]):
+class Terranova962A(VacuumController[Serial[ASCII]]):
 
     def __init__(self, device_location: str):
         transmission = Serial(device_location)

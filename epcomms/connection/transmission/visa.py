@@ -9,8 +9,6 @@ from typing import ClassVar
 from gpib_ctypes import make_default_gpib
 make_default_gpib()
 
-from gpib_ctypes import make_default_gpib
-make_default_gpib()
 
 import pyvisa
 
