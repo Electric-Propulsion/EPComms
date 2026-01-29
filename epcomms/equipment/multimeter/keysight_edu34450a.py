@@ -36,7 +36,7 @@ class KeysightEDU34450A(Multimeter[Visa, RangeT, ResolutionT]):
         Args:
             resource_name (str): The VISA resource name of the multimeter.
         """
-        transmission = Visa(resource_name)
+        transmission = Visa(resource_name, terminator="\n")
         super().__init__(transmission)
 
     def close(self) -> None:
