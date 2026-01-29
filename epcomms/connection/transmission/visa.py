@@ -5,14 +5,9 @@ This module provides the Visa class for handling VISA
 
 import time
 from threading import Lock
-from typing import ClassVar
-from gpib_ctypes import make_default_gpib
-make_default_gpib()
-
+from typing import ClassVar, Optional
 
 import pyvisa
-
-
 
 from epcomms.connection.packet import String
 
@@ -38,6 +33,7 @@ class Visa(Transmission[String, String]):
     class_lock: ClassVar[Lock] = Lock()
     resource_manager = pyvisa.ResourceManager("@py")
     device: pyvisa.resources.MessageBasedResource
+    terminator: Optional[str]
 
     @classmethod
     def list_resources(cls) -> tuple[str, ...]:
@@ -56,7 +52,7 @@ class Visa(Transmission[String, String]):
         cls.class_lock.release()
         return resources
 
-    def __init__(self, resource_name: str) -> None:
+    def __init__(self, resource_name: str, terminator: Optional[str] = None) -> None:
         """
         Initializes a connection to a VISA resource.
 
@@ -86,6 +82,7 @@ class Visa(Transmission[String, String]):
                     continue
             break
         self.device.timeout = 2500
+        self.terminator = terminator
         super().__init__()
 
     def _command(self, packet: String) -> None:
@@ -100,7 +97,7 @@ class Visa(Transmission[String, String]):
         AssertionError: If the provided data is not an instance of the ASCII class.
         """
         try:
-            self.device.write(packet.serialize())
+            self.device.write(packet.serialize(), termination=self.terminator)
         except Exception as e:
             raise e
 
@@ -112,7 +109,7 @@ class Visa(Transmission[String, String]):
             Packet: The data read from the device, encapsulated in a Packet object.
         """
         try:
-            packet = String.from_wire(self.device.read())
+            packet = String.from_wire(self.device.read(termination=self.terminator))
         except Exception as e:
             raise e
 

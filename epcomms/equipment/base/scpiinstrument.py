@@ -68,6 +68,6 @@ class SCPIInstrument:
     def _channel_string(cls, channels: Union[int, list[int], str]) -> str:
         return (
             ",".join([str(ch) for ch in list(filter(None, channels))])
-            if isinstance(channels, str)
+            if isinstance(channels, list)
             else str(channels)
         )

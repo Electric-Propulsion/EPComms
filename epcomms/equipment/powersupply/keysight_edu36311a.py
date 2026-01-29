@@ -24,7 +24,7 @@ class KeysightEDU36311A(PowerSupply[Visa], SCPIInstrument):
         Args:
             resource_name (str): The VISA resource name of the power supply.
         """
-        transmission = Visa(resource_name)
+        transmission = Visa(resource_name, terminator="\n")
         super().__init__(transmission)
 
     def beep(self) -> None:
