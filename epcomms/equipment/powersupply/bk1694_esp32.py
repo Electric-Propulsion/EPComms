@@ -43,7 +43,7 @@ class BK1694(PowerSupply[Socket]):
 
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for BK1694 must"
+                f"Invalid channel provided: {channel}. Channel for BK1694 must "
                 "be set to 1 or None."
             )
         data = json.dumps(

@@ -31,7 +31,7 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
         if not self.driver.connected:
             self.driver.open()
         serialized_packet = packet.serialize()
-        repsonse_tag: Tag = (
+        response_tag: Tag = (
             self.driver.generic_message(  # pyright: ignore[reportUnknownMemberType]
                 service=Services.set_attribute_single,
                 class_code=serialized_packet["class_code"],
@@ -41,8 +41,13 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
             )
         )
 
-        if not repsonse_tag:
-            raise TransmissionError()
+        if not response_tag:
+            raise TransmissionError(
+                f"EtherNet/IP command failed for "
+                f"class_code={serialized_packet['class_code']}, "
+                f"instance={serialized_packet['instance']}, "
+                f"attribute={serialized_packet['attribute']}"
+            )
 
     def _read(self) -> CIPRX:
         raise NotImplementedError(
@@ -73,6 +78,11 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
         )
 
         if not response_tag:
-            raise TransmissionError()
+            raise TransmissionError(
+                f"EtherNet/IP poll failed: empty response for "
+                f"class_code={serialized_packet['class_code']}, "
+                f"instance={serialized_packet['instance']}, "
+                f"attribute={serialized_packet['attribute']}"
+            )
 
         return CIPRX.from_wire(response_tag)

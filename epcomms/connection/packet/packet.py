@@ -45,7 +45,7 @@ class ReceivedPacket(Protocol[Data, Wire]):
         ...
 
     def deserialize(self) -> Data:
-        """Deserialize a packet to access it's data
+        """Deserialize a packet to access its data
 
         Returns:
             Data: The deserialized data.

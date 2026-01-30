@@ -83,29 +83,29 @@ class InficonBGP400(VacuumController[Serial[Bytes]]):
 
         unregister = self.register_subscriber(self_unregistering_wrapper)
 
-    def degass_on(self) -> None:
+    def degas_on(self) -> None:
         """Enable degas mode on the vacuum controller."""
-        packet = Bytes(bytes(bytearray([3, 16, 93, 148, 1])))
+        packet = Bytes.from_data(bytearray([3, 16, 93, 148, 1]))
         self.transmission.command(packet)
 
-    def degass_off(self) -> None:
+    def degas_off(self) -> None:
         """Disable degas mode on the vacuum controller."""
-        packet = Bytes(bytes(bytearray([3, 16, 93, 105, 214])))
+        packet = Bytes.from_data(bytearray([3, 16, 93, 105, 214]))
         self.transmission.command(packet)
 
     def set_mbar(self) -> None:
         """Set pressure unit to mbar."""
-        packet = Bytes(bytes(bytearray([3, 16, 62, 0, 78])))
+        packet = Bytes.from_data(bytearray([3, 16, 62, 0, 78]))
         self.transmission.command(packet)
 
     def set_torr(self) -> None:
         """Set pressure unit to torr."""
-        packet = Bytes(bytes(bytearray([3, 16, 62, 1, 79])))
+        packet = Bytes.from_data(bytearray([3, 16, 62, 1, 79]))
         self.transmission.command(packet)
 
     def set_pa(self) -> None:
         """Set pressure unit to pa."""
-        packet = Bytes(bytes(bytearray([3, 16, 62, 2, 80])))
+        packet = Bytes.from_data(bytearray([3, 16, 62, 2, 80]))
         self.transmission.command(packet)
 
     def read_loop(self) -> None:
@@ -205,7 +205,7 @@ class InficonBGP400(VacuumController[Serial[Bytes]]):
         match ((error >> 4) & 0b1111):
             case 0b0101:
                 error_msg = "Pirani adjusted poorly"
-            case 0b1001:
+            case 0b1000:
                 error_msg = "BA error"
             case 0b1001:
                 error_msg = "Pirani error"

@@ -18,9 +18,9 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
             raise ValueError("Invalid default measurement rate")
         super().__init__(transmission=Serial(device_location))
         # set up the multimeter to take measurements at the specified rate
-        self.transmission.poll(ASCII(f"RATE {default_meas_rate}\r"))
-        self.transmission.poll(ASCII("TRIGGER 1\r"))
-        self.transmission.poll(ASCII("AUTO\r"))
+        self.transmission.poll(ASCII.from_data(f"RATE {default_meas_rate}\r"))
+        self.transmission.poll(ASCII.from_data("TRIGGER 1\r"))
+        self.transmission.poll(ASCII.from_data("AUTO\r"))
 
     def read_fluke_status(self) -> None:
         """
@@ -60,7 +60,7 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         if resolution is None:
             return  # Use whatever resolution has been configured
         if resolution in ["S", "M", "F"]:
-            self.transmission.command(ASCII(f"RATE {resolution}\r"))
+            self.transmission.command(ASCII.from_data(f"RATE {resolution}\r"))
             self.read_fluke_status()
             return
         raise ValueError("Invalid resolution for Fluke 45. Must be S, M, or F")
@@ -87,12 +87,12 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         self, measurement_range: RangeT = None, resolution: ResolutionT = None
     ) -> float:
         # pylint: disable=unused-argument
-        self.transmission.command(ASCII("VDC\r"))
+        self.transmission.command(ASCII.from_data("VDC\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)
         self.set_resolution(resolution)
 
-        data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
+        data = self.transmission.poll(ASCII.from_data("VAL1?\r")).deserialize()
         self.read_fluke_status()
         return float(data)
 
@@ -112,9 +112,9 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         Returns:
             float: the measured resistance
         """
-        self.transmission.command(ASCII("CONT\r"))
+        self.transmission.command(ASCII.from_data("CONT\r"))
         self.read_fluke_status()
-        data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
+        data = self.transmission.poll(ASCII.from_data("VAL1?\r")).deserialize()
         self.read_fluke_status()
         return float(data)
 
@@ -125,11 +125,11 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         self, measurement_range: RangeT = None, resolution: ResolutionT = None
     ) -> float:
         # pylint: disable=unused-argument
-        self.transmission.command(ASCII("AAC\r"))
+        self.transmission.command(ASCII.from_data("AAC\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)
         self.set_resolution(resolution)
-        data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
+        data = self.transmission.poll(ASCII.from_data("VAL1?\r")).deserialize()
         self.read_fluke_status()
         return float(data)
 
@@ -137,11 +137,11 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         self, measurement_range: RangeT = None, resolution: ResolutionT = None
     ) -> float:
         # cause this is quick and dirty, ignoring the arguments
-        self.transmission.command(ASCII("ADC\r"))
+        self.transmission.command(ASCII.from_data("ADC\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)
         self.set_resolution(resolution)
-        data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
+        data = self.transmission.poll(ASCII.from_data("VAL1?\r")).deserialize()
         self.read_fluke_status()
         return float(data)
 
@@ -154,10 +154,10 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         Returns:
             float: the measured frequency
         """
-        self.transmission.command(ASCII("FREQ\r"))
+        self.transmission.command(ASCII.from_data("FREQ\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)
         self.set_resolution(resolution)
-        data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
+        data = self.transmission.poll(ASCII.from_data("VAL1?\r")).deserialize()
         self.read_fluke_status()
         return float(data)

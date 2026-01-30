@@ -61,7 +61,8 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
-        """_summary_
+        """
+        Measure capacitance
 
         Args:
             measurement_range (RangeT, optional): measurement range for this
@@ -111,7 +112,8 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
-        """_summary_
+        """
+        Measure a DC current
 
         Args:
             measurement_range (RangeT, optional): measurement range for this

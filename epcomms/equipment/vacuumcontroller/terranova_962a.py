@@ -41,12 +41,12 @@ class Terranova962A(VacuumController[Serial[ASCII]]):
         """
         Get the identity string of the device.
         """
-        ident_string = self.transmission.poll(ASCII("v")).deserialize()
+        ident_string = self.transmission.poll(ASCII.from_data("v")).deserialize()
         if "926" in ident_string:
             return ident_string
 
         raise TransmissionError(
-            f"Recieved a bad response: {ident_string} (expected identity)"
+            f"Received a bad response: {ident_string} (expected identity)"
         )
 
     def get_gauge_type(self) -> str:
@@ -58,7 +58,7 @@ class Terranova962A(VacuumController[Serial[ASCII]]):
             return gauge_str
 
         raise TransmissionError(
-            f"Recieved a bad response: {gauge_str} (expected gauge type)"
+            f"Received a bad response: {gauge_str} (expected gauge type)"
         )
 
     def _get_pressure_gauge_n(self, n: int) -> float:
@@ -83,5 +83,5 @@ class Terranova962A(VacuumController[Serial[ASCII]]):
                     return float(press_str)
                 except ValueError as e:
                     raise TransmissionError(
-                        f"Recieved a bad response: {press_str} (expected pressures)"
+                        f"Received a bad response: {press_str} (expected pressures)"
                     ) from e

@@ -33,8 +33,8 @@ class PicoUSBTC08(TemperatureSensor[Socket]):
         Configure a specific channel to a given thermocouple type.
 
         Args:
-            channel (int): _description_
-            channel_type (str): _description_
+            channel (int): channel number (1-8)
+            channel_type (str): thermocouple type (e.g., 'K', 'J', etc.)
         """
         data = json.dumps(
             {"command": "configure_channel", "channel": channel, "type": channel_type}

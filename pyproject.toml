@@ -26,7 +26,6 @@ pytest = "^8.3.2"
 allow-reexport-from-package = true
 disable = ["unnecessary-ellipsis", "import-error", "missing-module-docstring"]
 
-[tool.pylint.type
 
 [tool.pyright]
 reportMissingTypeStubs = false
