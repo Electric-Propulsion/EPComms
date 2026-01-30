@@ -1,22 +1,16 @@
-"""
-This module defines the abstract base class `Multimeter` for all multimeters.
-"""
-
-# pylint: disable=missing-module-docstring
-
+# pylint: disable=duplicate-code
 from abc import abstractmethod
 from typing import Generic, TypeVar
+
+from epcomms.equipment.base import Instrument, TransmissionTypeT
 
 RangeT = TypeVar("RangeT")
 ResolutionT = TypeVar("ResolutionT")
 
 
-from epcomms.equipment.base import Instrument, TransmissionType
-
-
 class Multimeter(
-    Instrument[TransmissionType],
-    Generic[TransmissionType, RangeT, ResolutionT],
+    Instrument[TransmissionTypeT],
+    Generic[TransmissionTypeT, RangeT, ResolutionT],
 ):
     """Abstract class for all multimeters."""
 
@@ -26,6 +20,19 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
+        """
+        Measure an AC voltage
+
+        Args:
+            measurement_range (RangeT, optional): measurement range for this
+                measurement. Defaults to None.
+            resolution (ResolutionT, optional): resolution for this
+                measurement. Defaults to None.
+
+
+        Returns:
+            float: the measured AC voltage
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -34,6 +41,18 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
+        """
+        Measure a DC voltage
+
+        Args:
+            measurement_range (RangeT, optional): measurement range for this
+                measurement. Defaults to None.
+            resolution (ResolutionT, optional): resolution for this
+                measurement. Defaults to None.
+
+        Returns:
+            float: the measured DC voltage
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -42,10 +61,27 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
+        """_summary_
+
+        Args:
+            measurement_range (RangeT, optional): measurement range for this
+                measurement. Defaults to None.
+            resolution (ResolutionT, optional): resolution for this
+                measurement. Defaults to None.
+
+        Returns:
+            float: the measured capacitance
+        """
         raise NotImplementedError
 
     @abstractmethod
     def measure_continuity(self) -> bool:
+        """
+        Use the multimeter to check if a circuit has continuity.
+
+        Returns:
+            bool: True if circuit is continuous.
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -54,6 +90,19 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
+        """
+        Measure an AC current
+
+        Args:
+            measurement_range (RangeT, optional): measurement range for this
+                measurement. Defaults to None.
+            resolution (ResolutionT, optional): resolution for this
+                measurement. Defaults to None.
+
+
+        Returns:
+            float: the measured AC current
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -62,4 +111,15 @@ class Multimeter(
         measurement_range: RangeT = None,
         resolution: ResolutionT = None,
     ) -> float:
+        """_summary_
+
+        Args:
+            measurement_range (RangeT, optional): measurement range for this
+                measurement. Defaults to None.
+            resolution (ResolutionT, optional): resolution for this
+                measurement. Defaults to None.
+
+        Returns:
+            float: the measured DC current
+        """
         raise NotImplementedError

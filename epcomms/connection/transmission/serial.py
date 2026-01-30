@@ -1,4 +1,4 @@
-from typing import TypeVar, Optional
+from typing import Optional, TypeVar
 
 from serial import Serial as Pyserial
 
@@ -10,14 +10,19 @@ T = TypeVar("T", ASCII, Bytes)
 
 
 class Serial(Transmission[T, T]):
+    """Serial transmission class using pyserial"""
 
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # STFU what do you know.
     def __init__(
         self,
         device: str,
         baud: int = 9600,
         frame_terminator: Optional[bytes] = b"\r\n",
         frame_prefix: Optional[bytes] = None,
-        frame_length: Optional[int] = None,  # number of bytes to read after prefix and before terminator
+        # number of bytes to read after prefix and before terminator
+        frame_length: Optional[int] = None,
         packet_type: type[T] = ASCII,
     ):
         self.driver = Pyserial(device, baud)
@@ -31,7 +36,6 @@ class Serial(Transmission[T, T]):
             raise ValueError(
                 "At least one of frame_length or frame_terminator must be specified"
             )
-        
 
     def _command(self, packet: T) -> None:
         self.driver.write(packet.serialize())

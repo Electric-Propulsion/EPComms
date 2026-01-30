@@ -1,11 +1,8 @@
-"""ASCII packet class"""
-
 from .packet import ReceivedPacket, TransmittedPacket
 
 
 class ASCII(TransmittedPacket[str, bytes], ReceivedPacket[str, bytes]):
-    """ASCII packet class
-    ASCII packets are simple strings that are sent and received as-is."""
+    """ASCII packets are simple strings that are sent and received as-is."""
 
     def __init__(self, data: str) -> None:
         self._data = data

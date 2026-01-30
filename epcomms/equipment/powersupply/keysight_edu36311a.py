@@ -1,15 +1,10 @@
-"""
-KeysightEDU36311A Power Supply Control
-This module provides an interface to control the Keysight EDU36311A power supply.
-"""
-
 from typing import Union
 
 from epcomms.connection.packet import String
 from epcomms.connection.transmission import Visa
 from epcomms.equipment.base import SCPIInstrument
 
-from . import PowerSupply
+from .power_supply import PowerSupply
 
 
 class KeysightEDU36311A(PowerSupply[Visa], SCPIInstrument):

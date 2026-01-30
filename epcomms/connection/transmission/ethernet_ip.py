@@ -1,33 +1,3 @@
-"""
-This module provides the EthernetIP class for communication with EtherNet/IP devices.
-Classes:
-    EthernetIP: A class for communication with EtherNet/IP devices.
-Exceptions:
-    TransmissionError: Raised when there is an error in transmission.
-Dependencies:
-    - Transmission, TransmissionError from the same package.
-    - CIPRX, CIPTX from epcomms.connection.packet.
-    - CIPDriver, Services from pycomm3.
-Classes:
-    EthernetIP(Transmission):
-        A class for communication with EtherNet/IP devices.
-        Attributes:
-            driver (CIPDriver): The driver object for the pycomm3 library.
-        Methods:
-            __init__(self, device_path):
-                Initializes the EthernetIP object.
-                    device_path (str): The path to the device, e.g. '192.168.0.172'.
-            command(self, data: CIPTX):
-                Sends a command to the device.
-                    data (CIPTX): The data to send to the device.
-            read(self):
-                Raises NotImplementedError as EthernetIP does not support read operations.
-            poll(self, data: CIPTX) -> CIPRX:
-                Polls the device for data.
-                    data (CIPTX): The data to poll for.
-                    CIPRX: The data received from the device.
-"""
-
 from pycomm3 import CIPDriver, Services
 from pycomm3.tag import Tag
 
@@ -101,7 +71,6 @@ class EthernetIP(Transmission[CIPRX, CIPTX]):
                 data_type=serialized_packet["data_type"],
             )
         )
-        
 
         if not response_tag:
             raise TransmissionError()

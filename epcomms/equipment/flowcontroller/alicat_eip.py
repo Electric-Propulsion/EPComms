@@ -1,5 +1,3 @@
-"""AlicatEIP class for communication with Alicat EIP flow control devices over EthernetIP"""
-
 from dataclasses import dataclass
 
 from epcomms.connection.packet import CIPTX, CIPData
@@ -7,7 +5,6 @@ from epcomms.connection.packet.cip_datatypes import REAL, STRING, UDINT, UINT, W
 from epcomms.connection.transmission import EthernetIP, TransmissionError
 
 from .flow_controller import FlowController
-
 
 
 @dataclass

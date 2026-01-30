@@ -1,6 +1,8 @@
 """
 BK1694 Power Supply Control over ESP32
-This module provides an interface to control the BK1694 power supply by sending commands to a server hosted on an ESP32.
+This module provides an interface to control the BK1694 power supply by sending
+commands to a server hosted on an ESP32.
+
 See https://github.com/Electric-Propulsion/BK1694_Controller.
 """
 
@@ -10,21 +12,25 @@ from dataclasses import dataclass
 from epcomms.connection.packet import String
 from epcomms.connection.transmission import Socket
 
-from . import PowerSupply
+from .power_supply import PowerSupply
 
 
 @dataclass
 class BK1694Status:
+    """Dataclass representing the status of the BK1694 power supply."""
+
     value: int
     enable: bool
 
 
 class BK1694(PowerSupply[Socket]):
+    """BK1694 Power Supply ESP32 interface implementation"""
 
     def __init__(self, ip: str):
         self.ip = ip  # Ours is "192.168.0.156"
         self.ws_url = f"ws://{self.ip}:7777"  # shouldn't hardcode port
-        self.transmission = Socket(self.ws_url)
+        transmission = Socket(self.ws_url)
+        super().__init__(transmission)
 
     def set_voltage(self, voltage: float, channel: int | list[int]) -> None:
         """Set the voltage.
@@ -37,7 +43,8 @@ class BK1694(PowerSupply[Socket]):
 
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for BK1694 must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for BK1694 must"
+                "be set to 1 or None."
             )
         data = json.dumps(
             {"command": "setValue", "value": self._convert_voltage_to_value(voltage)}
@@ -48,7 +55,8 @@ class BK1694(PowerSupply[Socket]):
         """Measure the voltage setpoint."""
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for BK1694 must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for BK1694 must "
+                "be set to 1 or None."
             )
         return self._convert_value_to_voltage(self._get_status().value)
 
@@ -80,7 +88,8 @@ class BK1694(PowerSupply[Socket]):
         """Get the output status."""
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for BK1694 must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for BK1694 must "
+                "be set to 1 or None."
             )
 
         return self._get_status().enable
@@ -96,7 +105,8 @@ class BK1694(PowerSupply[Socket]):
         """
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for BK1694 must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for BK1694 must "
+                "be set to 1 or None."
             )
 
         data = json.dumps({"command": "enable", "value": state})

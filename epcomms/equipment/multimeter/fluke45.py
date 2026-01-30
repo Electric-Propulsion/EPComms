@@ -1,5 +1,3 @@
-# pylint: disable=missing-module-docstring
-# TODO: Add docstrings # pylint: disable=fixme
 from typing import Literal
 
 from epcomms.connection.packet import ASCII
@@ -12,8 +10,7 @@ ResolutionT = Literal["S", "M", "F"] | None
 
 
 class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
-    # pylint: disable=missing-class-docstring
-    # pylint: disable=too-few-public-methods
+    """Fluke 45 Multimeter implementation."""
 
     def __init__(self, device_location: str, default_meas_rate: str = "F") -> None:
 
@@ -26,8 +23,11 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         self.transmission.poll(ASCII("AUTO\r"))
 
     def read_fluke_status(self) -> None:
-        # Just read the status string it sends back every time it takes a measurement and raise an error
-        # if it's unhappy
+        """
+        Read and parse the fluke status string
+        """
+        # Just read the status string it sends back every time it takes a
+        # measurement and raise an error if it's unhappy
 
         status = self.transmission.read().deserialize()
         if len(status) != 2 or status[-1] != ">":
@@ -38,6 +38,7 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
             raise TransmissionError("Fluke 45 Execution Error")
 
     def set_range(self, measurement_range: RangeT) -> None:
+        """Set the measurement range of the multimeter"""
         if measurement_range is None:
             return  # Use whatever range has been configured
         if measurement_range == "AUTO":
@@ -53,7 +54,8 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
             "Invalid Measurement range for Fluke 45. Must be AUTO or between 1 and 7"
         )
 
-    def set_resolution(self, resolution: ResolutionT) -> None:  # Actually rate
+    def set_resolution(self, resolution: ResolutionT) -> None:
+        """Set the measurement resolution of the multimeter (i.e. measurement rate)"""
         # Resolution is "rate"
         if resolution is None:
             return  # Use whatever resolution has been configured
@@ -103,6 +105,13 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
         )
 
     def measure_continuity_raw(self) -> float:
+        """
+        Check continuity using the multimeter. This returns the 'raw' reading,
+        e.g. the resistance.
+
+        Returns:
+            float: the measured resistance
+        """
         self.transmission.command(ASCII("CONT\r"))
         self.read_fluke_status()
         data = self.transmission.poll(ASCII("VAL1?\r")).deserialize()
@@ -139,6 +148,12 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
     def measure_frequency(
         self, measurement_range: RangeT = None, resolution: ResolutionT = None
     ) -> float:
+        """
+        Measure frequency using the multimeter.
+
+        Returns:
+            float: the measured frequency
+        """
         self.transmission.command(ASCII("FREQ\r"))
         self.read_fluke_status()
         self.set_range(measurement_range)

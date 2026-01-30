@@ -16,7 +16,10 @@
         "**/.pytest_cache/": true
     },
     "cSpell.words": [
+        "epcomms",
         "SCPI"
     ],
-    "python.analysis.typeCheckingMode": "strict"
+    "pylint.args": [
+        "--rcfile=${workspaceFolder}/pyproject.toml"
+    ]
 }

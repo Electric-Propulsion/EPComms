@@ -1,5 +1,3 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=cyclic-import
 from .fluke45 import Fluke45 as Fluke45
 from .keysight_edu34450a import KeysightEDU34450A as KeysightEDU34450A
 from .multimeter import Multimeter as Multimeter

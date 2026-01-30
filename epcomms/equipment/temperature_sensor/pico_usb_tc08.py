@@ -1,17 +1,13 @@
-"""
-Pico USB-TC-08 Thermocouple DAQ control.
-This module provides an interface to control the Pico USB-TC-08.
-"""
-
 import json
 
 from epcomms.connection.packet import String
 from epcomms.connection.transmission import Socket
 
-from . import TemperatureSensor
+from .temperature_sensor import TemperatureSensor
 
 
 class PicoUSBTC08(TemperatureSensor[Socket]):
+    """Pico USB TC-08 temperature sensor class using websockets."""
 
     def __init__(self, ip: str, port: int):
         self.ip = ip
@@ -28,11 +24,18 @@ class PicoUSBTC08(TemperatureSensor[Socket]):
         data = json.dumps({"command": "open_instrument"})
         self.transmission.command(String.from_data(data))
 
-    def close_instrument(self) -> None:
+    def close(self) -> None:
         data = json.dumps({"command": "close_instrument"})
         self.transmission.command(String.from_data(data))
 
     def configure_channel(self, channel: int, channel_type: str) -> None:
+        """
+        Configure a specific channel to a given thermocouple type.
+
+        Args:
+            channel (int): _description_
+            channel_type (str): _description_
+        """
         data = json.dumps(
             {"command": "configure_channel", "channel": channel, "type": channel_type}
         )
@@ -42,6 +45,7 @@ class PicoUSBTC08(TemperatureSensor[Socket]):
         """
         DO NOT DISABLE CHANNELS, EPComms will crash.
         """
+        # TODO: WTF well then why is this even here
         data = json.dumps({"command": "disable_channel", "channel": channel})
         self.transmission.command(String.from_data(data))
 
@@ -49,8 +53,14 @@ class PicoUSBTC08(TemperatureSensor[Socket]):
         raise NotImplementedError(
             "The Pico USB TC-08 does not support measuring temperature from one channel at a time."
         )
+        # TODO: well this is just a clusterfuck of a class isn't it. Why
+        # Even have an abstract class if it's somehow hyper-specific to
+        # concrete class but the concrete class doesn't even meet the contract?
 
     def measure_all_channels(self) -> list[float]:
+        """
+        Measure temperatures from all channels.
+        """
         data = json.dumps({"command": "measure_all_channels"})
         resp = self.transmission.poll(String.from_data(data)).deserialize()
         # For some reason websockets sends JSON strings with single quotes (bad).

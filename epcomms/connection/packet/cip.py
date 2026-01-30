@@ -1,24 +1,26 @@
-"""CIP packet classes"""
-
 from dataclasses import dataclass
 from typing import Optional, TypedDict, Union
 
 from pycomm3.tag import Tag
 
-from .packet import ReceivedPacket, TransmittedPacket
 from .cip_datatypes import DataType
+from .packet import ReceivedPacket, TransmittedPacket
 
 
 @dataclass
 class CIPData:
+    """Data structure for CIP message content"""
+
     class_code: int
     instance: int
     attribute: int
-    data_type: Optional[Union[type[DataType], DataType]]= None
+    data_type: Optional[Union[type[DataType], DataType]] = None
     request_data: Union[int, float, str, bytes] = b""
 
 
 class CIPGenericMessageContent(TypedDict):
+    """TypedDict for CIP Generic Message Content"""
+
     class_code: Union[int, bytes]
     instance: Union[int, bytes]
     attribute: Union[int, bytes]
@@ -27,8 +29,7 @@ class CIPGenericMessageContent(TypedDict):
 
 
 class CIPTX(TransmittedPacket[CIPData, CIPGenericMessageContent]):
-    """CIP Tx packet class
-    Representation of a CIP (Common Industrial Protocol) packet sent from a
+    """Representation of a CIP (Common Industrial Protocol) packet sent from a
     controller to a device on the network."""
 
     def __init__(self, data: CIPData) -> None:
@@ -42,7 +43,8 @@ class CIPTX(TransmittedPacket[CIPData, CIPGenericMessageContent]):
                 "attribute": self._data.attribute,
                 "request_data": (
                     self._data.data_type.encode(self._data.request_data)
-                    if self._data.request_data != b"" and self._data.data_type is not None
+                    if self._data.request_data != b""
+                    and self._data.data_type is not None
                     else self._data.request_data
                 ),
                 "data_type": self._data.data_type,
@@ -55,8 +57,7 @@ class CIPTX(TransmittedPacket[CIPData, CIPGenericMessageContent]):
 
 
 class CIPRX(ReceivedPacket[Union[str, int, float], Tag]):
-    """CIP Rx packet class
-    Representation of a CIP (Common Industrial Protocol) packet received from a
+    """Representation of a CIP (Common Industrial Protocol) packet received from a
     device on the network."""
 
     def __init__(self, tag: Tag):

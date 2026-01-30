@@ -2,7 +2,12 @@ from typing import Callable, TypeVar, Union
 
 
 class SCPIInstrument:
-    # Yar, it be a mixin!
+    """
+    SCPI Instrument Mixin Class.
+
+    This mixin provides utility methods for generating SCPI command and query
+    strings, as well as parsing SCPI responses.
+    """
 
     def generate_command(
         self,
@@ -27,6 +32,8 @@ class SCPIInstrument:
         if isinstance(arguments, list):
             arguments = ",".join(list(filter(None, arguments)))
 
+        # pylint: disable=line-too-long
+        # IDK man it's a long line, what are you gonna do
         return f"{command_keyword}{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channel_str})" if channels else ''}"
 
     def generate_query(
@@ -51,6 +58,7 @@ class SCPIInstrument:
             arguments = list(filter(None, arguments))
             arguments = ",".join(arguments)
 
+        # pylint: disable=line-too-long
         return f"{query_keyword}?{f" {arguments}" if arguments else ''}{',' if arguments and channels else ''}{f" (@{channel_str})" if channels else ''}"
 
     T = TypeVar("T")
@@ -58,11 +66,22 @@ class SCPIInstrument:
     def parse_response(
         self, conversion_function: Callable[[str], T], response: str
     ) -> T | list[T]:
+        """
+        Parse a SCPI response
+
+        Args:
+            conversion_function (Callable[[str], T]): callable to convert a
+                scpi string into a list of values
+            response (str): the SCPI response string
+
+        Returns:
+            T | list[T]: the converted value(s)
+        """
         value_list = response.strip("\n").split(",")
         if len(value_list) == 1:
             return conversion_function(value_list[0])
-        else:
-            return [conversion_function(value) for value in value_list]
+
+        return [conversion_function(value) for value in value_list]
 
     @classmethod
     def _channel_string(cls, channels: Union[int, list[int], str]) -> str:

@@ -1,9 +1,3 @@
-"""_summary_
-
-Returns:
-    _type_: _description_
-"""
-
 import asyncio
 
 import websockets
@@ -14,13 +8,15 @@ from .transmission import Transmission, TransmissionError
 
 
 class Socket(Transmission[String, String]):
+    """
+    Socket transmission class using websockets.
+    """
 
     def __init__(self, ws_url: str) -> None:
         super().__init__()
         self.ws_url = ws_url
         self._loop = asyncio.new_event_loop()
 
-    # TODO: be better than Any
     async def _async_send(self, packet: String) -> None:
         async with websockets.connect(self.ws_url) as websocket:
             await websocket.send(packet.serialize())

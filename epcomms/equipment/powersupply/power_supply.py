@@ -1,14 +1,12 @@
-"""
-This module defines the abstract base class `PowerSupply` for all power supplies.
-"""
+# pylint: disable=duplicate-code
 
 from abc import abstractmethod
 from typing import Union
 
-from epcomms.equipment.base import Instrument, TransmissionType
+from epcomms.equipment.base import Instrument, TransmissionTypeT
 
 
-class PowerSupply(Instrument[TransmissionType]):
+class PowerSupply(Instrument[TransmissionTypeT]):
     """Abstract Base Class for all Power Supplies."""
 
     @abstractmethod

@@ -1,15 +1,10 @@
-"""
-HP 6030A Power Supply Control
-This module provides an interface to control the HP 6030AA power supply.
-"""
-
 from typing import Literal, Union
 
 from epcomms.connection.packet import String
 from epcomms.connection.transmission import Visa
 from epcomms.equipment.base import SCPIInstrument
 
-from . import PowerSupply
+from .power_supply import PowerSupply
 
 # TODO: still unhappy with channel handling here
 
@@ -55,7 +50,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [None, 1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         self.transmission.command(
@@ -76,7 +72,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         return self.parse_response(
@@ -100,7 +97,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         return self.parse_response(
@@ -125,7 +123,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         self.transmission.command(
@@ -146,7 +145,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [None, 1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         return self.parse_response(
@@ -170,7 +170,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [None, 1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         return self.parse_response(
@@ -182,7 +183,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
 
     def get_output(self, channel: Union[int, list[int]] = 1) -> bool | list[bool]:
         """
-        Measures the output status of the specified channel on the HP6030A power supply.
+        Measures the output status of the specified channel on the HP6030A
+        power supply.
 
         Args:
             channel (int): The channel number to measure the output status from.
@@ -192,7 +194,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [None, 1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         return self.parse_response(
@@ -211,7 +214,8 @@ class HP6030A(PowerSupply[Visa], SCPIInstrument):
         """
         if channel not in [None, 1, [1]]:
             raise ValueError(
-                f"Invalid channel provided: {channel}. Channel for HP 6030A must be set to 1 or None."
+                f"Invalid channel provided: {channel}. Channel for HP 6030A "
+                "must be set to 1 or None."
             )
 
         value = 1 if state else 0

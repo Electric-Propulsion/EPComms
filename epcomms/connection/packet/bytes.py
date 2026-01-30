@@ -5,8 +5,9 @@ class Bytes(
     ReceivedPacket[bytearray, bytes],
     TransmittedPacket[bytearray, bytes],
 ):
-    """Bytes packet class
-    Bytes packets are raw byte sequences ."""
+    """
+    Bytes packets are raw byte sequences.
+    """
 
     def __init__(self, data: bytes) -> None:
         self._data = data
@@ -16,7 +17,7 @@ class Bytes(
 
     @classmethod
     def from_data(cls, data: bytearray) -> "Bytes":
-        return cls(data)
+        return cls(bytes(data))
 
     @classmethod
     def from_wire(cls, wire: bytes) -> "Bytes":

@@ -1,4 +1,7 @@
 import socket
+
+# pylint: disable=deprecated-module
+# TODO: Replace telnetlib with a modern alternative # pylint: disable=fixme
 import telnetlib
 
 from epcomms.connection.packet import ASCII
@@ -7,6 +10,7 @@ from .transmission import Transmission
 
 
 class Telnet(Transmission[ASCII, ASCII]):
+    """Telnet transmission class using telnetlib"""
 
     def __init__(self, host: str, port: int, terminator: str, timeout: float):
         self.driver = telnetlib.Telnet(host, port, timeout)

@@ -1,41 +1,39 @@
-"""
-This module defines the Instrument class, which serves as an abstract base class
-for all instruments that can sense the physical environment.
-"""
-
 from abc import ABC
 from types import NoneType
 from typing import Any, Generic, TypeVar, Union
 
 from epcomms.connection.transmission import Transmission
 
-TransmissionType = TypeVar(
-    "TransmissionType", bound=Union[Transmission[Any, Any], NoneType]
+TransmissionTypeT = TypeVar(
+    "TransmissionTypeT", bound=Union[Transmission[Any, Any], NoneType]
 )
 
 
 class MeasurementError(Exception):
-    pass
+    """Custom exception for measurement-related errors."""
 
 
 class CommandError(Exception):
-    pass
+    """Custom exception for command-related errors."""
 
 
-class Instrument(ABC, Generic[TransmissionType]):
+class Instrument(ABC, Generic[TransmissionTypeT]):
     # pylint: disable=too-few-public-methods
     """
     Abstract Base Class for all Instruments.
 
     Instruments are software representations of agents in the real world that
-    can sense the physical environment.
+    can sense the physical environment, and are the base class for all equipment.
     """
 
-    transmission: TransmissionType
+    transmission: TransmissionTypeT
 
-    def __init__(self, transmission: TransmissionType) -> None:
+    def __init__(self, transmission: TransmissionTypeT) -> None:
         self.transmission = transmission
 
     def close(self) -> None:
+        """
+        Safely close the instrument
+        """
         if self.transmission is not None:
             self.transmission.close()

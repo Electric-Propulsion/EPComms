@@ -5,6 +5,7 @@ from .scpi_multimeter import SCPIMultimeter
 
 
 class TektronixDMM4050(SCPIMultimeter[ASCII]):
+    """Tektronix DMM4050 Multimeter implementation."""
 
     def __init__(self, host: str, port: int):
         transmission = Telnet(host, port, "\n", 5)
