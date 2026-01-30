@@ -16,6 +16,10 @@
         "**/.pytest_cache/": true
     },
     "cSpell.words": [
+        "epcomms",
         "SCPI"
+    ],
+    "pylint.args": [
+        "--rcfile=${workspaceFolder}/pyproject.toml"
     ]
 }

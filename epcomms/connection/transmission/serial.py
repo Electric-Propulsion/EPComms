@@ -1,19 +1,61 @@
+from typing import Optional, TypeVar
+
 from serial import Serial as Pyserial
-from epcomms.connection.packet import ASCII
-from . import Transmission, TransmissionError
 
-class Serial(Transmission):
-    
-    def __init__(self, device: str, baud: int = 9600, terminator = '\r\n'):
+from epcomms.connection.packet import ASCII, Bytes
+
+from .transmission import Transmission
+
+T = TypeVar("T", ASCII, Bytes)
+
+
+class Serial(Transmission[T, T]):
+    """Serial transmission class using pyserial"""
+
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # STFU what do you know.
+    def __init__(
+        self,
+        device: str,
+        baud: int = 9600,
+        frame_terminator: Optional[bytes] = b"\r\n",
+        frame_prefix: Optional[bytes] = None,
+        # number of bytes to read after prefix and before terminator
+        frame_length: Optional[int] = None,
+        packet_type: type[T] = ASCII,
+    ):
         self.driver = Pyserial(device, baud)
-        self.terminator = terminator.encode("ascii")
-        super().__init__(ASCII)
+        self._packet_type = packet_type
+        self._frame_terminator = frame_terminator
+        self._frame_prefix = frame_prefix
+        self._frame_length = frame_length
+        super().__init__()
 
-    def _command(self, data: ASCII) -> None:
-        assert isinstance(data, self.packet_class)
-        self.driver.write(data.serialize_bytes())
+        if frame_length is None and frame_terminator is None:
+            raise ValueError(
+                "At least one of frame_length or frame_terminator must be specified"
+            )
 
-    def _read(self) -> ASCII:
-        data = self.driver.readline()#(self.terminator)
-        packet = self.packet_class(data.decode("ascii")[0:-len(self.terminator)])
-        return packet
+    def _command(self, packet: T) -> None:
+        self.driver.write(packet.serialize())
+
+    def _read(self) -> T:
+        data = bytes()
+        if self._frame_prefix is not None:
+            self.driver.read_until(self._frame_prefix)
+        if self._frame_length is not None:
+            data += self.driver.read(self._frame_length)
+            if self._frame_terminator is not None:
+                postfix = self.driver.read(len(self._frame_terminator))
+                if postfix != self._frame_terminator:
+                    raise RuntimeError("Frame terminator not found where expected")
+        elif self._frame_terminator is not None:
+            data += self.driver.read_until(self._frame_terminator)[
+                : -len(self._frame_terminator)
+            ]
+        else:
+            # This should be unreachable due to the check in __init__
+            raise RuntimeError("Unreachable state in Serial read")
+
+        return self._packet_type.from_wire(data)

@@ -1,77 +1,63 @@
-"""CIP packet classes"""
+from dataclasses import dataclass
+from typing import Optional, TypedDict, Union
 
-from typing import Union
-from pycomm3 import Tag
-from . import Packet
+from pycomm3.tag import Tag
 
-# pylint: disable=no-name-in-module
-# It's just some fuckery but it exists
-from . import DataType
+from .cip_datatypes import DataType
+from .packet import ReceivedPacket, TransmittedPacket
 
 
-class CIPTX(Packet):
-    """CIP Tx packet class
-    Representation of a CIP (Common Industrial Protocol) packet sent from a
+@dataclass
+class CIPData:
+    """Data structure for CIP message content"""
+
+    class_code: int
+    instance: int
+    attribute: int
+    data_type: Optional[Union[type[DataType], DataType]] = None
+    request_data: Union[int, float, str, bytes] = b""
+
+
+class CIPGenericMessageContent(TypedDict):
+    """TypedDict for CIP Generic Message Content"""
+
+    class_code: Union[int, bytes]
+    instance: Union[int, bytes]
+    attribute: Union[int, bytes]
+    request_data: Union[int, float, str, bytes]
+    data_type: Optional[Union[type[DataType], DataType]]
+
+
+class CIPTX(TransmittedPacket[CIPData, CIPGenericMessageContent]):
+    """Representation of a CIP (Common Industrial Protocol) packet sent from a
     controller to a device on the network."""
 
-    def __init__(
-        self,
-        class_code: int,
-        instance: int,
-        attribute: int,
-        parameters: Union[int, float, str, bytes] = b"",
-        data_type: Union[DataType, None] = None,
-    ) -> None:
-        self._class_code = class_code
-        self._instance = instance
-        self._attribute = attribute
-        self._data_type = data_type
-        if parameters != b"" and self.data_type is not None:
-            self._parameters = self._data_type.encode(parameters)
-        else:
-            self._parameters = parameters
-        self._data = {
-            "class_code": self._class_code,
-            "attribute": self._attribute,
-            "parameters": self._parameters,
-            "data_type": self._data_type,
-        }
+    def __init__(self, data: CIPData) -> None:
+        self._data = data
 
-    @property
-    def class_code(self) -> int:
-        """CIP object class"""
-        return self._class_code
+    def serialize(self) -> CIPGenericMessageContent:
+        return CIPGenericMessageContent(
+            {
+                "class_code": self._data.class_code,
+                "instance": self._data.instance,
+                "attribute": self._data.attribute,
+                "request_data": (
+                    self._data.data_type.encode(self._data.request_data)
+                    if self._data.request_data != b""
+                    and self._data.data_type is not None
+                    else self._data.request_data
+                ),
+                "data_type": self._data.data_type,
+            }
+        )
 
-    @property
-    def instance(self) -> int:
-        """CIP object instance"""
-        return self._instance
-
-    @property
-    def attribute(self) -> int:
-        """CIP object attribute"""
-        return self._attribute
-
-    @property
-    def parameters(self) -> Union[list, None]:
-        """CIP object parameters (if any)"""
-        return self._parameters
-
-    @property
-    def data_type(self) -> Union[DataType, None]:
-        """CIP object data type (if any)"""
-        return self._data_type
-
-    def serialize_str(self) -> str:
-        raise NotImplementedError("CIP TX packets cannot be serialized to strings.")
-
-    def serialize_bytes(self) -> bytes:
-        raise NotImplementedError("CIP TX packets cannot be serialized to bytes.")
+    @classmethod
+    def from_data(cls, data: CIPData) -> "CIPTX":
+        return cls(data)
 
 
-class CIPRX(Packet):
-    """CIP Rx packet class
-    Representation of a CIP (Common Industrial Protocol) packet received from a
+class CIPRX(ReceivedPacket[Union[str, int, float], Tag]):
+    """Representation of a CIP (Common Industrial Protocol) packet received from a
     device on the network."""
 
     def __init__(self, tag: Tag):
@@ -79,22 +65,19 @@ class CIPRX(Packet):
         self._data_type = tag.type
         self._error = tag.error
 
-    @property
-    def data(self) -> Union[str, int, float]:
+    @classmethod
+    def from_wire(cls, wire: Tag) -> "CIPRX":
+        return cls(wire)
+
+    def deserialize(self) -> Union[str, int, float]:
         return self._data
 
     @property
-    def data_type(self) -> DataType:
+    def data_type(self) -> str | None:
         """Data type of returned message, for decoding"""
         return self._data_type
 
     @property
-    def error(self) -> str:
+    def error(self) -> str | None:
         """Error message, if any"""
         return self._error
-
-    def serialize_str(self) -> str:
-        raise NotImplementedError("CIP RX packets cannot be serialized to strings.")
-
-    def serialize_bytes(self) -> bytes:
-        raise NotImplementedError("CIP RX packets cannot be serialized to bytes.")

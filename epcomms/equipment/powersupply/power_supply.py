@@ -1,13 +1,12 @@
-"""
-This module defines the abstract base class `PowerSupply` for all power supplies.
-"""
+# pylint: disable=duplicate-code
 
 from abc import abstractmethod
 from typing import Union
-from epcomms.equipment.base import Instrument
+
+from epcomms.equipment.base import Instrument, TransmissionTypeT
 
 
-class PowerSupply(Instrument):
+class PowerSupply(Instrument[TransmissionTypeT]):
     """Abstract Base Class for all Power Supplies."""
 
     @abstractmethod
@@ -16,12 +15,14 @@ class PowerSupply(Instrument):
         raise NotImplementedError
 
     @abstractmethod
-    def measure_voltage_setpoint(self, channel: Union[int, list[int]]) -> float:
+    def measure_voltage_setpoint(
+        self, channel: Union[int, list[int]]
+    ) -> float | list[float]:
         """Measure the voltage of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
-    def measure_voltage(self, channel: Union[int, list[int]]) -> float:
+    def measure_voltage(self, channel: Union[int, list[int]]) -> float | list[float]:
         """Measure the voltage of the power supply."""
         raise NotImplementedError
 
@@ -31,17 +32,19 @@ class PowerSupply(Instrument):
         raise NotImplementedError
 
     @abstractmethod
-    def measure_current_limit(self, channel: Union[int, list[int]]) -> float:
+    def measure_current_limit(
+        self, channel: Union[int, list[int]]
+    ) -> float | list[float]:
         """Measure the current of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
-    def measure_current(self, channel: Union[int, list[int]]) -> float:
+    def measure_current(self, channel: Union[int, list[int]]) -> float | list[float]:
         """Measure the current of the power supply."""
         raise NotImplementedError
 
     @abstractmethod
-    def get_output(self, channel: Union[int, list[int]]) -> None:
+    def get_output(self, channel: Union[int, list[int]]) -> bool | list[bool]:
         """Get the output status of the power supply."""
         raise NotImplementedError
 
