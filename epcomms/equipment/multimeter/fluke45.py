@@ -19,7 +19,7 @@ class Fluke45(Multimeter[Serial[ASCII], RangeT, ResolutionT]):
 
         if default_meas_rate not in ["F", "M", "S"]:
             raise ValueError("Invalid default measurement rate")
-        super().__init__(transmission=Serial(device_location, frame_terminator=b"\r"))
+        super().__init__(transmission=Serial(device_location))
         # set up the multimeter to take measurements at the specified rate
         self.transmission.poll(ASCII(f"RATE {default_meas_rate}\r"))
         self.transmission.poll(ASCII("TRIGGER 1\r"))
