@@ -1,26 +1,53 @@
-"""Abstract base class for packets."""
+from typing import Protocol, TypeVar
 
-from abc import ABC, abstractmethod
-from typing import Union
+Data = TypeVar("Data", infer_variance=True)
+Wire = TypeVar("Wire", infer_variance=True)
 
 
-class Packet(ABC):
-    """Abstract base class for packets. The represent data that's being
-    transmitted, but may not map exactly to the bits on the line."""
+class TransmittedPacket(
+    Protocol[Data, Wire],
+):
+    """Base protocol for transmitted packets."""
 
-    _data: Union[str, int, float] = None
+    def serialize(self) -> Wire:
+        """Serialize a packet for transmission over the wire
 
-    @abstractmethod
-    def serialize_bytes(self) -> bytes:
-        """Serialize the packet into bytes for transmission."""
-        raise NotImplementedError("Calling abstract method!")
+        Returns:
+            Wire: The wire-ready representation of the data.
+        """
+        ...
 
-    @abstractmethod
-    def serialize_str(self) -> str:
-        """Serialize the packet into a string for transmission."""
-        raise NotImplementedError("Calling abstract method!")
+    @classmethod
+    def from_data(cls, data: Data) -> "TransmittedPacket[Data, Wire]":
+        """Create a transmitted packet from data.
 
-    @property
-    def data(self) -> Union[str, int, float]:
-        """Serialize the packet into a string for transmission."""
-        return self._data
+        Args:
+            data (Data): The data to be transmitted.
+        Returns:
+            TransmittedPacket[Data, Wire]: The transmitted packet instance.
+        """
+        ...
+
+
+class ReceivedPacket(Protocol[Data, Wire]):
+    """Base protocol for received packets."""
+
+    @classmethod
+    def from_wire(cls, wire: Wire) -> "ReceivedPacket[Data, Wire]":
+        """Create a packet from received data
+
+        Args:
+            wire (Wire): data received from the wire.
+
+        Returns:
+            ReceivedPacket[Data, Wire]: The received packet instance.
+        """
+        ...
+
+    def deserialize(self) -> Data:
+        """Deserialize a packet to access its data
+
+        Returns:
+            Data: The deserialized data.
+        """
+        ...

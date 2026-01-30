@@ -1,20 +1,19 @@
-"""
-Pico USB-TC-08 Thermocouple DAQ control.
-This module provides an interface to control the Pico USB-TC-08.
-"""
-
-from epcomms.connection.transmission import Socket
-from . import TemperatureSensor
-
 import json
 
-class PicoUSBTC08(TemperatureSensor):
+from epcomms.connection.packet import String
+from epcomms.connection.transmission import Socket
+
+from .temperature_sensor import TemperatureSensor
+
+
+class PicoUSBTC08(TemperatureSensor[Socket]):
+    """Pico USB TC-08 temperature sensor class using websockets."""
 
     def __init__(self, ip: str, port: int):
         self.ip = ip
         self.port = port
         self.ws_url = f"ws://{self.ip}:{str(self.port)}"
-        self.transmission = Socket(self.ws_url)
+        super().__init__(Socket(self.ws_url))
 
         self.open_instrument()
 
@@ -22,31 +21,49 @@ class PicoUSBTC08(TemperatureSensor):
         """
         Starts the Pico Datalogger and automatically configures all 8 channels to be of 'K' type.
         """
-        data = {"command": "open_instrument"}
-        self.transmission.command(data)
-    
-    def close_instrument(self) -> None:
-        data = {"command": "close_instrument"}
-        self.transmission.command(data)
+        data = json.dumps({"command": "open_instrument"})
+        self.transmission.command(String.from_data(data))
 
-    def configure_channel(self, channel: int, type: str) -> None:
-        data = {"command": "configure_channel", "channel": channel, "type": type}
-        self.transmission.command(data)
-    
+    def close(self) -> None:
+        data = json.dumps({"command": "close_instrument"})
+        self.transmission.command(String.from_data(data))
+
+    def configure_channel(self, channel: int, channel_type: str) -> None:
+        """
+        Configure a specific channel to a given thermocouple type.
+
+        Args:
+            channel (int): channel number (1-8)
+            channel_type (str): thermocouple type (e.g., 'K', 'J', etc.)
+        """
+        data = json.dumps(
+            {"command": "configure_channel", "channel": channel, "type": channel_type}
+        )
+        self.transmission.command(String.from_data(data))
+
     def disable_channel(self, channel: int) -> None:
         """
         DO NOT DISABLE CHANNELS, EPComms will crash.
         """
-        data = {"command": "disable_channel", "channel": channel}
-        self.transmission.command(data)
-    
+        # TODO: WTF well then why is this even here
+        data = json.dumps({"command": "disable_channel", "channel": channel})
+        self.transmission.command(String.from_data(data))
+
     def measure_temperature(self, channel: int) -> float:
-        raise NotImplementedError("The Pico USB TC-08 does not support measuring temperature from one channel at a time.")
-    
-    def measure_all_channels(self) -> list:
-        data = {"command": "measure_all_channels"}
-        resp = self.transmission.poll(data)
+        raise NotImplementedError(
+            "The Pico USB TC-08 does not support measuring temperature from one channel at a time."
+        )
+        # TODO: well this is just a clusterfuck of a class isn't it. Why
+        # Even have an abstract class if it's somehow hyper-specific to
+        # concrete class but the concrete class doesn't even meet the contract?
+
+    def measure_all_channels(self) -> list[float]:
+        """
+        Measure temperatures from all channels.
+        """
+        data = json.dumps({"command": "measure_all_channels"})
+        resp = self.transmission.poll(String.from_data(data)).deserialize()
         # For some reason websockets sends JSON strings with single quotes (bad).
         resp_unp = json.loads(str(resp).replace("'", '"'))
         # Return all real channels (not cold junction), hence index 0 excluded.
-        return resp_unp['temps'][1:]
+        return [float(val) for val in resp_unp["temps"][1:]]
